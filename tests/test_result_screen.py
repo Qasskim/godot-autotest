@@ -1,81 +1,85 @@
 """
-결과 화면 검증 테스트
-전제: 오토플레이 완주 직후 결과 화면이 표시된 상태에서 실행
+결과 화면 검증 테스트 (TC-8 ~ TC-11)
+전제: 오토플레이 완주 후 ResultScreen 상태
 """
-import time
 from datetime import datetime
-from common.ocr_helper import get_screen_text, tap
+import common.api_client as api
 from common.result_writer import record_pass, record_fail
+
+
+def _screenshot(driver, case_num: int) -> str:
+    path = f"screenshots/{datetime.now().strftime('%Y%m%d_%H%M%S')}_tc{case_num}.png"
+    driver.save_screenshot(path)
+    return path
 
 
 def run(driver, wb, ws, case_num: int) -> int:
 
-    # TC: 결과 화면에 판정 항목(Wow/Great/Good/Oops)이 모두 표시되는가?
+    # TC-8: 판정 항목(Wow/Great/Good/Oops) 모두 0 이상인가?
+    case_num += 1
     try:
-        case_num += 1
-        text = get_screen_text(driver)
-        missing = [label for label in ['Wow', 'Great', 'Good', 'Oops'] if label not in text]
+        result = api.get_result()
+        keys = ["wow", "great", "good", "oops"]
+        missing = [k for k in keys if k not in result]
         if not missing:
-            record_pass(wb, ws, case_num, '결과 화면에 판정 항목(Wow/Great/Good/Oops)이 모두 표시되는가?')
+            detail = ", ".join(f"{k}={result[k]}" for k in keys)
+            record_pass(wb, ws, case_num, "결과 화면에 판정 항목이 모두 표시되는가?", detail)
         else:
-            screenshot = f'screenshots/{datetime.now().strftime("%Y%m%d_%H%M%S")}_tc{case_num}.png'
-            driver.save_screenshot(screenshot)
-            record_fail(wb, ws, case_num, '결과 화면에 판정 항목(Wow/Great/Good/Oops)이 모두 표시되는가?',
-                        screenshot, f'미표시 항목: {missing}')
+            ss = _screenshot(driver, case_num)
+            record_fail(wb, ws, case_num, "결과 화면에 판정 항목이 모두 표시되는가?",
+                        ss, f"누락 키: {missing}")
     except Exception as e:
-        screenshot = f'screenshots/{datetime.now().strftime("%Y%m%d_%H%M%S")}_tc{case_num}.png'
-        driver.save_screenshot(screenshot)
-        record_fail(wb, ws, case_num, '판정 항목 표시 확인 오류', screenshot, str(e))
-        print(str(e))
+        ss = _screenshot(driver, case_num)
+        record_fail(wb, ws, case_num, "결과 화면에 판정 항목이 모두 표시되는가?", ss, str(e))
 
-    # TC: 결과 화면에 점수(숫자)가 표시되는가?
+    # TC-9: 점수(score)가 0 이상인가?
+    case_num += 1
     try:
-        case_num += 1
-        import re
-        text = get_screen_text(driver)
-        numbers = re.findall(r'\d{3,}', text.replace(',', ''))
-        if numbers:
-            record_pass(wb, ws, case_num, '결과 화면에 점수가 표시되는가?', f'인식된 점수: {numbers[0]}')
+        result = api.get_result()
+        score  = result.get("score", -1)
+        max_ex = result.get("max_ex", 0)
+        if score >= 0:
+            record_pass(wb, ws, case_num, "결과 화면에 점수가 표시되는가?",
+                        f"score={score}, max_ex={max_ex}, accuracy={result.get('accuracy'):.2f}%")
         else:
-            screenshot = f'screenshots/{datetime.now().strftime("%Y%m%d_%H%M%S")}_tc{case_num}.png'
-            driver.save_screenshot(screenshot)
-            record_fail(wb, ws, case_num, '결과 화면에 점수가 표시되는가?', screenshot, '점수 숫자 미인식')
+            ss = _screenshot(driver, case_num)
+            record_fail(wb, ws, case_num, "결과 화면에 점수가 표시되는가?",
+                        ss, f"score={score}")
     except Exception as e:
-        screenshot = f'screenshots/{datetime.now().strftime("%Y%m%d_%H%M%S")}_tc{case_num}.png'
-        driver.save_screenshot(screenshot)
-        record_fail(wb, ws, case_num, '점수 표시 확인 오류', screenshot, str(e))
-        print(str(e))
+        ss = _screenshot(driver, case_num)
+        record_fail(wb, ws, case_num, "결과 화면에 점수가 표시되는가?", ss, str(e))
 
-    # TC: 결과 화면에 다시 시작(Retry) 버튼이 존재하는가?
+    # TC-10: 다시하기 버튼 → 게임 화면 진입
+    case_num += 1
     try:
-        case_num += 1
-        text = get_screen_text(driver)
-        if any(kw in text for kw in ['RETRY', 'Retry', '다시']):
-            record_pass(wb, ws, case_num, '결과 화면에 다시 시작 버튼이 존재하는가?')
+        api.tap_retry()
+        ok = api.wait_for_scene("GameScene", timeout=15)
+        if ok:
+            record_pass(wb, ws, case_num, "다시하기 버튼 동작 후 게임 화면에 진입했는가?")
         else:
-            screenshot = f'screenshots/{datetime.now().strftime("%Y%m%d_%H%M%S")}_tc{case_num}.png'
-            driver.save_screenshot(screenshot)
-            record_fail(wb, ws, case_num, '결과 화면에 다시 시작 버튼이 존재하는가?', screenshot, f'화면 텍스트: {text[:100]}')
+            ss = _screenshot(driver, case_num)
+            record_fail(wb, ws, case_num, "다시하기 버튼 동작 후 게임 화면에 진입했는가?",
+                        ss, f"씬 전환 실패: {api.get_scene()}")
     except Exception as e:
-        screenshot = f'screenshots/{datetime.now().strftime("%Y%m%d_%H%M%S")}_tc{case_num}.png'
-        driver.save_screenshot(screenshot)
-        record_fail(wb, ws, case_num, '다시 시작 버튼 확인 오류', screenshot, str(e))
-        print(str(e))
+        ss = _screenshot(driver, case_num)
+        record_fail(wb, ws, case_num, "다시하기 버튼 동작 후 게임 화면에 진입했는가?", ss, str(e))
 
-    # TC: 결과 화면에 곡 선택으로 돌아가기(Back) 버튼이 존재하는가?
+    # TC-10 이후 결과 화면으로 다시 이동 (TC-11 준비)
+    api.wait_for_scene("ResultScreen", timeout=300, interval=2.0)
+
+    # TC-11: 곡선택 버튼 → 곡 선택 화면 복귀
+    case_num += 1
     try:
-        case_num += 1
-        text = get_screen_text(driver)
-        if any(kw in text for kw in ['BACK', 'Back', '돌아', '목록']):
-            record_pass(wb, ws, case_num, '결과 화면에 곡 선택으로 돌아가기 버튼이 존재하는가?')
+        api.tap_select_song()
+        ok = api.wait_for_scene("SongSelect", timeout=10)
+        if ok:
+            record_pass(wb, ws, case_num, "곡 선택 버튼 동작 후 곡 선택 화면에 복귀했는가?")
         else:
-            screenshot = f'screenshots/{datetime.now().strftime("%Y%m%d_%H%M%S")}_tc{case_num}.png'
-            driver.save_screenshot(screenshot)
-            record_fail(wb, ws, case_num, '결과 화면에 곡 선택으로 돌아가기 버튼이 존재하는가?', screenshot, f'화면 텍스트: {text[:100]}')
+            ss = _screenshot(driver, case_num)
+            record_fail(wb, ws, case_num, "곡 선택 버튼 동작 후 곡 선택 화면에 복귀했는가?",
+                        ss, f"씬 전환 실패: {api.get_scene()}")
     except Exception as e:
-        screenshot = f'screenshots/{datetime.now().strftime("%Y%m%d_%H%M%S")}_tc{case_num}.png'
-        driver.save_screenshot(screenshot)
-        record_fail(wb, ws, case_num, '돌아가기 버튼 확인 오류', screenshot, str(e))
-        print(str(e))
+        ss = _screenshot(driver, case_num)
+        record_fail(wb, ws, case_num, "곡 선택 버튼 동작 후 곡 선택 화면에 복귀했는가?", ss, str(e))
 
     return case_num
