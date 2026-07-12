@@ -1,8 +1,15 @@
 venv/
 __pycache__/
 *.pyc
-test_results.xlsx
-screenshots/
-*.png
+.pytest_cache/
+tests/reports/
+
+# 예전 시도 잔여물 (Appium/이미지매칭/매뉴얼 생성 등) — 추적 대상 아님
 docs/
 refs/
+screenshots/
+common/
+settings.cfg
+test_results.xlsx
+*.png
+*.pptx
