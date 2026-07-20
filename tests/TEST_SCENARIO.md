@@ -115,4 +115,4 @@
 
 ---
 
-> 마지막 업데이트: 2026-07-13 (구현 완료 — `tests/test_full_scenario.py` + `Godot/debug/TestServer.gd`·`DebugState.gd` 엔드포인트 25개 반영. Godot 실행 후 실제 PASS 흐름 확인은 아직 안 됨)
+> 마지막 업데이트: 2026-07-20 (Godot 실행 후 `pytest test_full_scenario.py -v` 실기 검증 완료 — 17개 케이스 전부 PASS, 4분 46초, 마지막 QUIT 정상 종료까지 확인. `tests/reports/test_results.xlsx` 기록됨)
