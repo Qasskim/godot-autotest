@@ -13,3 +13,10 @@ settings.cfg
 test_results.xlsx
 *.png
 *.pptx
+
+# 빌드 산출물은 절대 올리지 않는다(디버그 APK에는 테스트 계정 정보가 들어갈 수 있음)
+apk/
+*.apk
+*.aab
+*.pck
+*.idsig
