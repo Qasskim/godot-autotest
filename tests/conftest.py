@@ -19,6 +19,7 @@ _case_num = 0
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "slow: 게임 플레이 대기가 필요한 느린 테스트")
+    config.addinivalue_line("markers", "no_server: TestServer(게임 실행) 없이 도는 테스트 — 서버 연결 확인과 실패 스크린샷을 건너뜀")
     global _wb, _ws
     _wb, _ws = init_workbook()
 
@@ -46,12 +47,15 @@ def pytest_runtest_makereport(item, call):
     screenshot_path = None
     if result == "FAIL":
         note = str(report.longrepr)[:300]
-        ts = time.strftime("%Y%m%d_%H%M%S")
-        safe_name = item.nodeid.replace("/", "_").replace("::", "_").replace("?", "_")
-        candidate = os.path.join(REPORTS_DIR, f"FAIL_{safe_name}_{ts}.png")
-        if client.screenshot(candidate):
-            screenshot_path = candidate
-            note = f"{note}\n[스크린샷] {screenshot_path}"
+        if not item.get_closest_marker("no_server"):
+            ts = time.strftime("%Y%m%d_%H%M%S")
+            safe_name = item.nodeid.replace("/", "_").replace("::", "_").replace("?", "_")
+            candidate = os.path.join(REPORTS_DIR, f"FAIL_{safe_name}_{ts}.png")
+            if client.screenshot(candidate):
+                screenshot_path = candidate
+                note = f"{note}\n[스크린샷] {screenshot_path}"
+    elif result == "SKIP":
+        note = str(getattr(report, "wasxfail", "") or "")[:300]
 
     record(_wb, _ws, _case_num, item.nodeid, result, note, screenshot_path)
 
@@ -79,12 +83,23 @@ def record_na(case_name: str, note: str) -> None:
     record(_wb, _ws, _case_num, case_name, "N/A", note)
 
 
-@pytest.fixture(scope="session", autouse=True)
-def require_server():
-    for _ in range(10):
-        if client.ping():
-            return
-        time.sleep(1)
+_server_ok = None  # None=아직 확인 안 함, True/False=세션 안에서 한 번 확인한 결과
+
+
+@pytest.fixture(autouse=True)
+def require_server(request):
+    global _server_ok
+    if request.node.get_closest_marker("no_server"):
+        return
+    if _server_ok is None:
+        _server_ok = False
+        for _ in range(10):
+            if client.ping():
+                _server_ok = True
+                break
+            time.sleep(1)
+    if _server_ok:
+        return
     pytest.skip("Godot TestServer에 연결할 수 없습니다 (포트 5000). 게임을 먼저 실행하세요.")
 
 
