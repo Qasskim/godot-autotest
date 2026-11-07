@@ -111,6 +111,7 @@ Python 패키지는 배치 파일 실행 시 자동으로 설치됩니다 (`pip 
 | `test_data_locale.py` | **데이터 검증 모듈 7** (2026-11-08) — 번역 CSV(키 중복·빈 값·자리표시자)와 코드가 쓰는 키의 존재. 영어 타이틀 키 노출 사고(11-05) 재발 방지 |
 | `test_unit_locale.py` | **모듈 7(Godot 쪽)** — 임포트된 번역이 CSV와 같은지, `Locale`의 `has`/`t_or`/`tf` 동작 |
 | `test_unit_signing.py` | **모듈 8** (2026-11-08) — 공식 채보 서명. 게임의 검증 함수(`ChartLoader._verify_signature`, RSA-SHA256)로 수록 17곡 `manifest.json`·68채보의 `.sig`가 현재 파일과 맞는지, 변조·빈 서명·다른 파일 서명을 거부하는지 확인 |
+| `test_unit_hold.py` | **모듈 9** (2026-11-08) — 롱노트 처리(DESIGN §6). `LongNoteVisual`을 곡 시계와 터치 입력을 직접 움직여 검증: 정상 홀드·틱 게이지, 끝 앞 창 밖 이탈(Miss·콤보 0), 끝 앞 Oops 창(250ms, 경계 포함) 안에서 뗌, 헤드 미스와 구제, 이탈 뒤 재진입, 오토플레이·키보드 |
 | `test_unit_offline.py` | **단위 테스트 모듈 5** (2026-11-08) — 서버 접속 차단 가드. 프레임을 실제로 돌려 오토로드 `_ready`가 실행돼도 `--no-server`로 세션이 만들어지지 않고 서버 조회·쓰기가 차단되는지 확인 |
 | `test_unit_lanemix.py` | **단위 테스트 모듈 4** (2026-11-08) — 레인믹스 상태(`LaneMixState`: 섹션·키모드 랜덤/슈퍼랜덤·구간 경계·활성화), 진입 안내(`LaneMixEntry`: 2마디 전 안내·수락·3초 미리보기), 노트 랜덤(`NoteRandomizer`: RANDOM/S-RANDOM, 드래그 체인 회피) |
 | `test_unit_lanes.py` | **단위 테스트 모듈 2** (2026-11-07) — 키 모드 그룹표(DESIGN §3), 레인 좌표, 물리 키 배치·키보드/터치 입력 처리(DESIGN §4), 터치 구역 변환, 한 번 누름에 판정되는 노트 규칙(DESIGN §5), 라인판정 보정. 모듈 1과 같은 방식으로 헤드리스 실행 |
@@ -131,6 +132,7 @@ tests/test_unit_balance.py    # 항목 하나 = pytest 케이스 하나, 기존 
 - 실행: `cd tests` 후 `pytest test_unit_balance.py test_unit_lanes.py test_unit_timing.py test_unit_lanemix.py` (기기 연결 불필요, 모듈마다 5~20초). 모듈이 스크립트 오류로 멈추면 실행기의 감시 타이머가 90초 뒤 오류 원문과 함께 끝낸다.
 - 서버 없이 도는 테스트는 `@pytest.mark.no_server` 표시를 달면 TestServer 연결 확인과 실패 스크린샷 시도를 건너뜁니다.
 - 명세와 코드가 다른데 어느 쪽이 맞는지 정해지지 않은 항목은 `test_unit_balance.py`의 `KNOWN_ISSUES`에 사유와 함께 올려 두고 xfail로 표시합니다(통과해 버리면 오히려 실패로 알려 줍니다).
+- **모듈이 스크립트 오류로 중간에 끝나면 검사가 조용히 빠진다** (2026-11-08 모듈 2에서 발견: 터치 구역·터치 입력 검사 40건이 뷰포트 null 오류로 만들어지지 않았는데 "통과"로 보고됨). 그래서 `run_unit_module`은 엔진의 `SCRIPT ERROR`를 모아 모듈마다 `스크립트 오류 없음` TC를 추가하고, 예상된 오류만 `allow_errors`로 허용한다. 뷰포트·오토로드 `_ready`가 필요한 모듈은 `var needs_frames := true`를 두면 실행기가 프레임 2번을 기다린 뒤 시작한다(`--no-server`가 항상 붙어 서버에는 접속하지 않음).
 - **서버 접속 금지 (2026-11-07 사고 이후)**: 게임을 그냥 띄우면 오토로드 `SupabaseHTTP._ready()`가 `ensure_session()`으로 **개발 서버에 익명 계정을 만들고**, 오토플레이로 치면 기록도 올라간다. 그래서 자동화에서 게임을 띄울 때는 반드시 `godot_runner.start_game()`을 쓴다. 이 함수는 항상 엔진 인자 `--no-server`를 붙이고(끄는 옵션 없음) APPDATA도 격리한다. `--no-server`는 디버그 빌드에서만 동작하며 서버로 나가는 모든 요청을 막는다. 단위 테스트(헤드리스)는 프레임을 기다리지 않아 서버에 접속하지 않는다(실행 후 격리 폴더에 `supabase_session.json`이 없어야 정상). `tests/test_no_server.py`가 이 효과(세션 파일 미생성, 서버 호출 차단, 외부 TCP 연결 0개)를 확인한다.
 - **헤드리스 실행기도 항상 `--no-server`를 붙인다** (2026-11-08 사고: 모듈이 스크립트 오류로 멈춰 감시 타이머 전까지 프레임이 돌았고, 그동안 오토로드 `_ready`가 개발 서버에 익명 계정을 만들었다). 모듈 5가 이 가드를 확인한다.
 - 게임 사용자 폴더(`%APPDATA%\RhythmGame_New`)와 서버 세션을 건드리지 않도록 게임 프로세스에만 `APPDATA`를 `tests/reports/_appdata`로 바꿔 줍니다.
