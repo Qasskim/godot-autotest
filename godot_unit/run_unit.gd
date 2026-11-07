@@ -26,7 +26,7 @@ func _initialize() -> void:
 		quit(2)
 		return
 	var body = script.new()
-	var results: Array = body.run()
+	var results: Array = await body.run()   # 프레임을 기다리는 모듈(unit_offline)도 있어서 await — 동기 모듈은 그대로 값이 돌아온다
 	for r in results:
 		print("@@UNIT@@ ", JSON.stringify(r))
 	if body.has_method("cleanup"):
