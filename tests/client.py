@@ -183,6 +183,20 @@ def wait_for_scene(expected: str, timeout: float = 15.0, interval: float = 0.5) 
     return False
 
 
+def tap_until_scene(action: str, expected: str, timeout: float = 15.0, interval: float = 1.5) -> bool:
+    """action을 탭하고 expected 씬으로 바뀔 때까지 interval마다 다시 탭한다. 타임아웃 시 False.
+
+    ResultScreen처럼 씬 이름이 먼저 보고된 뒤 버튼 연결이 늦게 끝나는 화면에서는 첫 탭이
+    버려진다(2026-11-07 실측: 결과 화면 등장 직후 탭이 무시되고 약 2초 뒤 재탭에서 동작).
+    같은 화면 이동 탭은 여러 번 보내도 결과가 같아서 재탭해도 안전하다."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        tap(action)
+        if wait_for_scene(expected, timeout=interval):
+            return True
+    return False
+
+
 def wait_for_shutdown(timeout: float = 15.0, interval: float = 0.5) -> bool:
     """QUIT 이후 서버가 응답을 멈출 때까지(=프로세스 정상 종료) 대기. 타임아웃 시 False."""
     deadline = time.time() + timeout

@@ -34,7 +34,6 @@ def test_full_flow():
     assert client.wait_for_scene("ResultScreen", timeout=15)
     assert "score" in client.result()
 
-    client.tap("select_song")
-    assert client.wait_for_scene("SongSelect", timeout=15)
+    assert client.tap_until_scene("select_song", "SongSelect", timeout=15)
 
     client.autoplay(False)

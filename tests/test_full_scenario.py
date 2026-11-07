@@ -177,8 +177,7 @@ def test_04_play_every_chart():
             record_case(f"{prefix}: 결과값(score/grade) 정합성",
                         "score" in res and "grade" in res, note=str(res)[:200])
 
-        client.tap("select_song")
-        back_to_select = client.wait_for_scene("SongSelect", timeout=15)
+        back_to_select = client.tap_until_scene("select_song", "SongSelect", timeout=15)
         record_case(f"{prefix}: 곡선택으로 복귀", back_to_select)
 
     client.autoplay(False)
