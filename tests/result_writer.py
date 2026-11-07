@@ -10,10 +10,28 @@ EXCEL_PATH = os.path.join(os.path.dirname(__file__), "reports", "test_results.xl
 
 
 def init_workbook():
+    global EXCEL_PATH
     os.makedirs(os.path.dirname(EXCEL_PATH), exist_ok=True)
+    wb = None
     if os.path.exists(EXCEL_PATH):
-        wb = openpyxl.load_workbook(EXCEL_PATH)
-    else:
+        try:
+            wb = openpyxl.load_workbook(EXCEL_PATH)
+            # 불러온 이미지는 두 번째 save부터 "I/O operation on closed file"로 죽고 파일까지 깨뜨린다
+            # (2026-11-07 재현). 이전 실행의 삽입 이미지는 버리고(스크린샷 원본은 reports/의 png로 남아 있음) 글자 기록만 이어 쓴다.
+            for old_ws in wb.worksheets:
+                old_ws._images = []
+        except Exception as e:
+            stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            broken = EXCEL_PATH + f".broken_{stamp}"
+            try:
+                os.replace(EXCEL_PATH, broken)
+                print(f"\n[result_writer] 기존 결과 파일을 읽지 못해 {broken} 로 옮기고 새로 만듭니다: {e}")
+            except OSError as move_err:
+                # 옛 파일이 다른 프로세스에 잡혀 있으면 옮기지 못한다 — 멈추지 말고 이번 실행은 새 이름으로 기록한다.
+                EXCEL_PATH = os.path.join(os.path.dirname(EXCEL_PATH), f"test_results_{stamp}.xlsx")
+                print(f"\n[result_writer] 기존 결과 파일을 읽지도 옮기지도 못해({e} / {move_err}) 이번 실행은 {EXCEL_PATH} 에 기록합니다.")
+            wb = None
+    if wb is None:
         wb = openpyxl.Workbook()
 
     sheet_name = _unique_sheet_name(wb, datetime.now().strftime("%d-%m-%Y"))
