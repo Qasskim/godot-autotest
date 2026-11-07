@@ -67,7 +67,8 @@ def run_unit_module(module: str, timeout: int = 180) -> list:
     os.makedirs(APPDATA_DIR, exist_ok=True)
     env = dict(os.environ, APPDATA=APPDATA_DIR)
     cmd = [GODOT_EXE, "--headless", "--path", GAME_PROJECT,
-           "--script", os.path.join(UNIT_DIR, "run_unit.gd"), "--", f"module={module}"]
+           "--script", os.path.join(UNIT_DIR, "run_unit.gd"), "--", f"module={module}",
+           "--no-server"]   # 모듈이 오류로 멈춰 프레임이 돌면 오토로드 _ready가 서버에 익명 계정을 만든다(2026-11-08 사고) — 항상 차단
     proc = subprocess.run(cmd, capture_output=True, env=env, timeout=timeout)
     out = proc.stdout.decode("utf-8", errors="replace")
     err = proc.stderr.decode("utf-8", errors="replace")
