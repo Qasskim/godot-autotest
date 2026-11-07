@@ -110,6 +110,7 @@ Python 패키지는 배치 파일 실행 시 자동으로 설치됩니다 (`pip 
 | `test_data_charts.py` | **데이터 검증 모듈 6** (2026-11-08) — 수록 17곡 68채보와 튜토리얼 채보의 구조·메타·키음 파일·노트 필드·드래그 체인·타이밍·레인믹스 구간, 곡 폴더 구성(manifest, full_mix, preview, 자켓). 파일만 읽음(DESIGN §8·§9·§14) |
 | `test_data_locale.py` | **데이터 검증 모듈 7** (2026-11-08) — 번역 CSV(키 중복·빈 값·자리표시자)와 코드가 쓰는 키의 존재. 영어 타이틀 키 노출 사고(11-05) 재발 방지 |
 | `test_unit_locale.py` | **모듈 7(Godot 쪽)** — 임포트된 번역이 CSV와 같은지, `Locale`의 `has`/`t_or`/`tf` 동작 |
+| `test_unit_signing.py` | **모듈 8** (2026-11-08) — 공식 채보 서명. 게임의 검증 함수(`ChartLoader._verify_signature`, RSA-SHA256)로 수록 17곡 `manifest.json`·68채보의 `.sig`가 현재 파일과 맞는지, 변조·빈 서명·다른 파일 서명을 거부하는지 확인 |
 | `test_unit_offline.py` | **단위 테스트 모듈 5** (2026-11-08) — 서버 접속 차단 가드. 프레임을 실제로 돌려 오토로드 `_ready`가 실행돼도 `--no-server`로 세션이 만들어지지 않고 서버 조회·쓰기가 차단되는지 확인 |
 | `test_unit_lanemix.py` | **단위 테스트 모듈 4** (2026-11-08) — 레인믹스 상태(`LaneMixState`: 섹션·키모드 랜덤/슈퍼랜덤·구간 경계·활성화), 진입 안내(`LaneMixEntry`: 2마디 전 안내·수락·3초 미리보기), 노트 랜덤(`NoteRandomizer`: RANDOM/S-RANDOM, 드래그 체인 회피) |
 | `test_unit_lanes.py` | **단위 테스트 모듈 2** (2026-11-07) — 키 모드 그룹표(DESIGN §3), 레인 좌표, 물리 키 배치·키보드/터치 입력 처리(DESIGN §4), 터치 구역 변환, 한 번 누름에 판정되는 노트 규칙(DESIGN §5), 라인판정 보정. 모듈 1과 같은 방식으로 헤드리스 실행 |
