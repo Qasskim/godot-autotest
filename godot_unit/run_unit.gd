@@ -26,6 +26,11 @@ func _initialize() -> void:
 		quit(2)
 		return
 	var body = script.new()
+	# 트리가 정식으로 시작된 상태(뷰포트·오토로드 _ready)가 필요한 모듈은 needs_frames=true — 프레임 2번을 기다린 뒤 시작한다.
+	# 항상 --no-server와 함께 실행되므로 오토로드가 서버에 접속하지 않는다(모듈 5가 확인).
+	if "needs_frames" in body and body.needs_frames:
+		await process_frame
+		await process_frame
 	var results: Array = await body.run()   # 프레임을 기다리는 모듈(unit_offline)도 있어서 await — 동기 모듈은 그대로 값이 돌아온다
 	for r in results:
 		print("@@UNIT@@ ", JSON.stringify(r))

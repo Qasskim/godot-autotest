@@ -61,9 +61,11 @@ def stop_game(proc) -> None:
     subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"], capture_output=True)
 
 
-def run_unit_module(module: str, timeout: int = 180) -> list:
+def run_unit_module(module: str, timeout: int = 180, allow_errors: tuple = ()) -> list:
     """모듈 이름(unit_<module>.gd)을 실행해 [{name, pass, detail}, ...] 를 돌려준다.
-    결과가 하나도 없으면(스크립트 오류 등) RuntimeError — 조용히 0건으로 통과시키지 않는다."""
+    결과가 하나도 없으면(스크립트 오류 등) RuntimeError — 조용히 0건으로 통과시키지 않는다.
+    엔진이 낸 SCRIPT ERROR 는 그 함수가 중간에 끝나 뒤의 검사가 만들어지지 않았다는 뜻이다(2026-11-08 모듈 2에서 발견).
+    허용 목록(allow_errors: 오류 줄에 들어 있는 글자)에 없는 오류가 있으면 "스크립트 오류 없음" TC를 실패로 추가한다."""
     os.makedirs(APPDATA_DIR, exist_ok=True)
     env = dict(os.environ, APPDATA=APPDATA_DIR)
     cmd = [GODOT_EXE, "--headless", "--path", GAME_PROJECT,
@@ -79,4 +81,15 @@ def run_unit_module(module: str, timeout: int = 180) -> list:
     if not results:
         tail = "\n".join((out + "\n" + err).strip().splitlines()[-15:])
         raise RuntimeError(f"단위 테스트 모듈 '{module}' 결과가 없습니다 (종료코드 {proc.returncode}):\n{tail}")
+    lines = (out + "\n" + err).splitlines()
+    errors = []
+    for i, line in enumerate(lines):
+        if "SCRIPT ERROR" in line or "Parse Error" in line or "@@UNIT_ERROR@@" in line:
+            where = lines[i + 1].strip() if i + 1 < len(lines) and "at:" in lines[i + 1] else ""
+            text = f"{line.strip()} {where}".strip()
+            if not any(a in text for a in allow_errors):
+                errors.append(text)
+    results.append({"name": f"스크립트 오류 없음: 모듈 {module} (엔진 SCRIPT ERROR가 없어야 검사가 빠짐없이 만들어짐)",
+                    "pass": not errors,
+                    "detail": f"{len(errors)}건 — " + " | ".join(errors[:3])})
     return results
