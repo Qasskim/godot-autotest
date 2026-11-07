@@ -26,6 +26,9 @@ def pytest_configure(config):
 
 def pytest_sessionfinish(session, exitstatus):
     finalize(_wb)
+    if _game_proc is not None:
+        from godot_runner import stop_game
+        stop_game(_game_proc)
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -84,23 +87,32 @@ def record_na(case_name: str, note: str) -> None:
 
 
 _server_ok = None  # None=아직 확인 안 함, True/False=세션 안에서 한 번 확인한 결과
+_game_proc = None  # 이 세션이 직접 띄운 게임(없으면 None) — 세션이 끝나면 종료한다
 
 
 @pytest.fixture(autouse=True)
 def require_server(request):
-    global _server_ok
+    global _server_ok, _game_proc
     if request.node.get_closest_marker("no_server"):
         return
     if _server_ok is None:
         _server_ok = False
-        for _ in range(10):
+        for _ in range(10):                       # 이미 떠 있는 게임(폰 adb 포워딩 등)이 있으면 그것을 쓴다
             if client.ping():
                 _server_ok = True
                 break
             time.sleep(1)
+        if not _server_ok and os.environ.get("AUTOTEST_AUTOLAUNCH", "1") != "0":
+            # 없으면 PC에서 직접 띄운다. start_game 은 항상 --no-server 로 띄워 개발 서버에 계정·기록을 만들지 않는다(2026-11-07 사고).
+            try:
+                from godot_runner import start_game
+                _game_proc = start_game()
+                _server_ok = True
+            except Exception as e:
+                print(f"\n[conftest] 게임을 직접 띄우지 못했습니다: {e}")
     if _server_ok:
         return
-    pytest.skip("Godot TestServer에 연결할 수 없습니다 (포트 5000). 게임을 먼저 실행하세요.")
+    pytest.skip("Godot TestServer에 연결할 수 없습니다 (포트 5000). 게임을 먼저 실행하거나 AUTOTEST_AUTOLAUNCH=1(기본)로 두세요.")
 
 
 def play_one_round() -> dict:
