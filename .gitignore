@@ -20,3 +20,8 @@ apk/
 *.aab
 *.pck
 *.idsig
+
+# 시퀀서 공식 비교용 C# 콘솔의 빌드 산출물
+csharp_check/**/bin/
+csharp_check/**/obj/
+csharp_check/**/out/
