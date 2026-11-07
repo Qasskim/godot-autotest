@@ -162,8 +162,8 @@ func _normal_hold() -> void:
 	_touch_down(w)
 	w.note.on_press(T)                 # 정확히 눌러 헤드 Wow
 	_run(w, T, END)
-	near("롱 홀드(Wow 헤드) [구현 동작·DESIGN §6 표는 +0.25×20%로만 적음]: 틱은 헤드 등급 기준 +0.75×20% → 15틱 252.25", w.gauge.gauge, G0 + 15.0 * WOW_TICK)
-	eq("롱 홀드(Wow 헤드) [구현 동작·DESIGN §6 표는 \"테일 Wow\"]: 테일에서 헤드 등급(Wow)이 나감", w.log, [["Wow", LANE, false]])
+	near("롱 홀드(Wow 헤드): 틱은 헤드 등급 기준 +0.75×20% → 15틱 252.25 (DESIGN §6)", w.gauge.gauge, G0 + 15.0 * WOW_TICK)
+	eq("롱 홀드(Wow 헤드): 테일에서 헤드 등급(Wow)이 나감 — 롱노트의 점수 판정은 이 한 번 (DESIGN §6)", w.log, [["Wow", LANE, false]])
 
 
 # ── 끝 앞 창 밖에서 뗌 = 이탈 (DESIGN §6: Miss·콤보 0) ──────────────────────────
