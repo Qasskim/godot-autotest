@@ -107,6 +107,7 @@ Python 패키지는 배치 파일 실행 시 자동으로 설치됩니다 (`pip 
 | `test_full_scenario.py` | `TEST_SCENARIO.md` 기반 — 모든 화면/버튼 진입, 곡 목록 전체 순회, 정상종료. 단독 실행 전용 |
 | `test_no_server.py` | `--no-server` 회귀 테스트(2026-11-07) — 자동화가 게임을 띄워도 서버에 접속하지 않음을 확인. 게임을 직접 띄우므로 포트 5000에 다른 게임이 있으면 중단 |
 | `test_unit_timing.py` | **단위 테스트 모듈 3** (2026-11-08) — 박자(`TimeSignature`)와 타이밍 테이블(`ChartTiming`: 마디 길이 공식, BPM·박자 변경 이벤트, 조회 경계). 기대값은 공식에서 손으로 계산한 ms |
+| `test_unit_offline.py` | **단위 테스트 모듈 5** (2026-11-08) — 서버 접속 차단 가드. 프레임을 실제로 돌려 오토로드 `_ready`가 실행돼도 `--no-server`로 세션이 만들어지지 않고 서버 조회·쓰기가 차단되는지 확인 |
 | `test_unit_lanemix.py` | **단위 테스트 모듈 4** (2026-11-08) — 레인믹스 상태(`LaneMixState`: 섹션·키모드 랜덤/슈퍼랜덤·구간 경계·활성화), 진입 안내(`LaneMixEntry`: 2마디 전 안내·수락·3초 미리보기), 노트 랜덤(`NoteRandomizer`: RANDOM/S-RANDOM, 드래그 체인 회피) |
 | `test_unit_lanes.py` | **단위 테스트 모듈 2** (2026-11-07) — 키 모드 그룹표(DESIGN §3), 레인 좌표, 물리 키 배치·키보드/터치 입력 처리(DESIGN §4), 터치 구역 변환, 한 번 누름에 판정되는 노트 규칙(DESIGN §5), 라인판정 보정. 모듈 1과 같은 방식으로 헤드리스 실행 |
 | `test_unit_balance.py` | **단위 테스트 모듈 1** (2026-11-07) — 판정 창·EX 점수·등급 커트라인·게이지·콤보·마크를 DESIGN.md §5 수치로 검증(§6 롱/드래그 처리는 아직 미검증, 게이지 20% 비중만 포함). 게임 창·기기·TestServer 없이 Godot 헤드리스로 실행 |
@@ -127,6 +128,7 @@ tests/test_unit_balance.py    # 항목 하나 = pytest 케이스 하나, 기존 
 - 서버 없이 도는 테스트는 `@pytest.mark.no_server` 표시를 달면 TestServer 연결 확인과 실패 스크린샷 시도를 건너뜁니다.
 - 명세와 코드가 다른데 어느 쪽이 맞는지 정해지지 않은 항목은 `test_unit_balance.py`의 `KNOWN_ISSUES`에 사유와 함께 올려 두고 xfail로 표시합니다(통과해 버리면 오히려 실패로 알려 줍니다).
 - **서버 접속 금지 (2026-11-07 사고 이후)**: 게임을 그냥 띄우면 오토로드 `SupabaseHTTP._ready()`가 `ensure_session()`으로 **개발 서버에 익명 계정을 만들고**, 오토플레이로 치면 기록도 올라간다. 그래서 자동화에서 게임을 띄울 때는 반드시 `godot_runner.start_game()`을 쓴다. 이 함수는 항상 엔진 인자 `--no-server`를 붙이고(끄는 옵션 없음) APPDATA도 격리한다. `--no-server`는 디버그 빌드에서만 동작하며 서버로 나가는 모든 요청을 막는다. 단위 테스트(헤드리스)는 프레임을 기다리지 않아 서버에 접속하지 않는다(실행 후 격리 폴더에 `supabase_session.json`이 없어야 정상). `tests/test_no_server.py`가 이 효과(세션 파일 미생성, 서버 호출 차단, 외부 TCP 연결 0개)를 확인한다.
+- **헤드리스 실행기도 항상 `--no-server`를 붙인다** (2026-11-08 사고: 모듈이 스크립트 오류로 멈춰 감시 타이머 전까지 프레임이 돌았고, 그동안 오토로드 `_ready`가 개발 서버에 익명 계정을 만들었다). 모듈 5가 이 가드를 확인한다.
 - 게임 사용자 폴더(`%APPDATA%\RhythmGame_New`)와 서버 세션을 건드리지 않도록 게임 프로세스에만 `APPDATA`를 `tests/reports/_appdata`로 바꿔 줍니다.
 
 자세한 시나리오 설계(법칙, 케이스별 상태)는 [`tests/TEST_SCENARIO.md`](tests/TEST_SCENARIO.md) 참고.
