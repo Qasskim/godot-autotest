@@ -2,6 +2,7 @@ extends RefCounted
 # 자체 점검(모듈 2) — unit_lanes.gd 가 값 변경을 실제로 잡아내는지 확인한다.
 # 게임 파일은 건드리지 않는다. 실행 중인 프로세스의 메모리 값(판정 창, 입력 바인딩, 레인 좌표)만 잠깐 바꿨다가 바로 되돌린다.
 
+var needs_frames := true   # unit_lanes 가 뷰포트·ScreenLayout 을 쓰므로 트리가 시작된 뒤에 돈다
 var results: Array = []
 
 

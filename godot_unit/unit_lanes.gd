@@ -14,6 +14,7 @@ const SPEC_GROUPS := {
 }
 const MODES := [4, 5, 6, 8, 16]
 
+var needs_frames := true   # 뷰포트·오토로드가 필요(터치 구역·입력 시험) — 실행기가 프레임 2번을 기다린 뒤 시작한다
 var results: Array = []
 var _free_nodes: Array = []
 var after_setup: Callable = Callable()   # 자체 점검이 화면 설정 직후 값을 바꿔 보기 위한 훅(평소에는 비어 있음)
@@ -163,6 +164,14 @@ func _lane_positions() -> void:
 			if absf(ls.get_group_center_x(gl[0], m) - expect) > TOL:
 				gc_ok = false
 	check("레인 좌표: 그룹 중심 X = 그룹 첫·끝 레인 X의 평균(전 키 모드·전 그룹)", gc_ok)
+
+	# (1-2) 오토로드 LaneSystem 의 실제 좌표 — 트리가 시작된 상태라 ScreenLayout 값으로 계산된다: 레인 i 의 월드 X = 터치 구역 i 의 중심
+	var real_bad: Array = []
+	for i in 16:
+		var want_x: float = (i + 0.5) * 2400.0 / 16.0 - 1200.0
+		if absf(LaneSystem.get_lane_x(i) - want_x) > TOL:
+			real_bad.append("레인%d 기대 %.3f 실제 %.3f" % [i, want_x, LaneSystem.get_lane_x(i)])
+	check("레인 좌표(실제 오토로드): 레인 i의 월드 X = (i+0.5)×화면폭/16 − 화면폭/2 (2400폭, 터치 구역 중심과 일치)", real_bad.is_empty(), "; ".join(real_bad.slice(0, 3)))
 
 	# (2) 화면 비례 배치 — ScreenLayout 주석: "레인 i 월드 X = zone_w × (i − 7.5) → 터치 존 i 중심과 정확히 일치" (DESIGN §4: 터치는 화면 폭/16 칸)
 	var vw: float = 2400.0
