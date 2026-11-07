@@ -267,10 +267,10 @@ func _reentry() -> void:
 
 
 # ── 허용 폭 경계 ───────────────────────────────────────────────────────
-# [구현 동작] 궤적 허용 폭은 코드가 레인 간격×1.5 (DESIGN §6 문서는 \"±25px(레인 너비 절반)\")
+# 궤적 허용 폭은 레인 간격×1.5 (DESIGN §6)
 func _tolerance() -> void:
 	var tol: float = _env().note.TRAJ_TOLERANCE
-	eq("허용 폭 [구현 동작·DESIGN §6은 ±25px]: 레인 간격(ScreenLayout.lane_gap)의 1.5배", tol, ScreenLayout.lane_gap * 1.5)
+	eq("허용 폭: 레인 간격(ScreenLayout.lane_gap)의 1.5배 (DESIGN §6)", tol, ScreenLayout.lane_gap * 1.5)
 	var inside := _env()
 	_touch(inside, _traj_x(T), true)
 	inside.note.on_press(T)
