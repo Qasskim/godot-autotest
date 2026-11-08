@@ -14,15 +14,14 @@ from godot_runner import GAME_PROJECT
 _STRINGS: dict = {}
 
 
-def ui(key: str) -> str:
-    if not _STRINGS:
+def ui(key: str, lang: str = "ko") -> str:
+    """게임의 문구(strings.csv). lang 은 'ko' 또는 'en'."""
+    if lang not in _STRINGS:
         with open(os.path.join(GAME_PROJECT, "locale", "strings.csv"), encoding="utf-8", newline="") as f:
             rows = list(csv.reader(f))
-        ko = rows[0].index("ko")
-        for r in rows[1:]:
-            if r:
-                _STRINGS[r[0]] = r[ko]
-    return _STRINGS[key]
+        col = rows[0].index(lang)
+        _STRINGS[lang] = {r[0]: r[col] for r in rows[1:] if r and len(r) > col}
+    return _STRINGS[lang][key]
 
 
 # docs/TUTORIAL_SPEC.md §4 — 스테이지별 대사 (스테이지 0~4 = 화면의 Stage 1~5)

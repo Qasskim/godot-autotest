@@ -67,6 +67,30 @@ def fill_input(text: str) -> bool:
     return bool(_req("POST", "/screen_input?" + urllib.parse.urlencode({"text": text})).get("ok"))
 
 
+def select_tab(title: str) -> bool:
+    """화면에 보이는 탭 묶음에서 제목이 같은 탭으로 옮긴다."""
+    return bool(_req("POST", "/screen_tab?" + urllib.parse.urlencode({"text": title})).get("ok"))
+
+
+def set_slider(n: int, value: float) -> dict:
+    """화면에 보이는 n번째 슬라이더의 값을 바꾼다 (value_changed 가 나간다)."""
+    return _req("POST", "/screen_slider?" + urllib.parse.urlencode({"n": n, "value": value}))
+
+
+def tabs() -> list:
+    """화면에 보이는 탭 제목 목록 [(제목, 선택됨)]."""
+    return [(i["text"], i["selected"]) for i in screen()["items"] if i["kind"] == "tab"]
+
+
+def sliders() -> list:
+    return [i["value"] for i in screen()["items"] if i["kind"] == "slider"]
+
+
+def slider_alphas() -> list:
+    """슬라이더별 실제 투명도(조상까지 곱함) — 접힌 줄은 0."""
+    return [i["alpha"] for i in screen()["items"] if i["kind"] == "slider"]
+
+
 def pick_option(n: int, item: str = "") -> dict:
     """화면에 보이는 n번째 드롭다운에서 항목 글자를 고른다. item 이 비면 항목 목록·현재 값만 돌려준다 ({"ok","count","items","selected"})."""
     return _req("POST", "/screen_option?" + urllib.parse.urlencode({"n": n, "item": item}))
