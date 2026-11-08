@@ -25,3 +25,6 @@ apk/
 csharp_check/**/bin/
 csharp_check/**/obj/
 csharp_check/**/out/
+
+# 서버 테스트 계정 장부 (로컬 전용 — 정리 루틴이 읽는다)
+server_ledger.jsonl

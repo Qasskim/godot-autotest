@@ -24,6 +24,30 @@ def ping() -> bool:
         return False
 
 
+def supabase_session(wait: float = 0.0) -> dict:
+    """게임의 서버 세션 상태. wait>0 이면 session_ready 가 될 때까지(또는 --no-server 로 막힐 때까지) 기다린다."""
+    deadline = time.time() + wait
+    while True:
+        s = _req("GET", "/supabase_session")
+        if s.get("session_ready") or s.get("last_auth_error") == "no-server" or time.time() >= deadline:
+            return s
+        time.sleep(0.5)
+
+
+def debug_login(account: int, timeout: float = 20.0) -> dict:
+    """고정 테스트 계정 N(debug_test_account{N}.local.json)으로 로그인한다. 성공하면 세션 상태를 돌려주고 실패하면 AssertionError."""
+    _req("POST", f"/supabase_debug_login?account={account}")
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        st = _req("GET", "/supabase_debug_login")
+        if st.get("status") == "success":
+            return supabase_session()
+        if st.get("status") == "error":
+            raise AssertionError(f"테스트 계정 {account} 로그인 실패: {st.get('result')}")
+        time.sleep(0.5)
+    raise AssertionError(f"테스트 계정 {account} 로그인이 {timeout}초 안에 끝나지 않았습니다")
+
+
 def scene() -> str:
     return _req("GET", "/scene").get("scene", "")
 

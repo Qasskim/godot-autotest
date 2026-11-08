@@ -20,8 +20,14 @@ _case_num = 0
 def pytest_configure(config):
     config.addinivalue_line("markers", "slow: 게임 플레이 대기가 필요한 느린 테스트")
     config.addinivalue_line("markers", "no_server: TestServer(게임 실행) 없이 도는 테스트 — 서버 연결 확인과 실패 스크린샷을 건너뜀")
+    config.addinivalue_line("markers", "server: 개발 서버(Supabase)에 실제로 접속하는 테스트 — AUTOTEST_SERVER=1 일 때만 돌고, 게임을 --no-server 없이 띄운다. 만든 계정은 server_ledger.jsonl 에 적힌다")
     global _wb, _ws
     _wb, _ws = init_workbook()
+
+
+def pytest_collection_modifyitems(config, items):
+    """서버 테스트를 맨 뒤로 보낸다 — 게임을 --no-server 로 먼저 쓰고, 서버 모드로는 한 번만 바꿔 띄우기 위해."""
+    items.sort(key=lambda it: 1 if it.get_closest_marker("server") else 0)
 
 
 def pytest_sessionfinish(session, exitstatus):
@@ -88,13 +94,34 @@ def record_na(case_name: str, note: str) -> None:
 
 _server_ok = None  # None=아직 확인 안 함, True/False=세션 안에서 한 번 확인한 결과
 _game_proc = None  # 이 세션이 직접 띄운 게임(없으면 None) — 세션이 끝나면 종료한다
+_game_server_mode = False  # 직접 띄운 게임이 서버 모드(--no-server 없음)인지
+
+
+def _switch_game(allow_server: bool) -> None:
+    """직접 띄운 게임을 종료하고 다른 모드로 다시 띄운다. 포트 5000이 비기를 기다린다."""
+    global _game_proc, _game_server_mode
+    from godot_runner import start_game, stop_game
+    stop_game(_game_proc)
+    for _ in range(20):
+        if not client.ping():
+            break
+        time.sleep(0.5)
+    _game_proc = start_game(allow_server=allow_server)
+    _game_server_mode = allow_server
 
 
 @pytest.fixture(autouse=True)
 def require_server(request):
-    global _server_ok, _game_proc
+    global _server_ok, _game_proc, _game_server_mode
     if request.node.get_closest_marker("no_server"):
         return
+    wants_server = bool(request.node.get_closest_marker("server"))
+    if wants_server and os.environ.get("AUTOTEST_SERVER", "0") != "1":
+        pytest.skip("서버 접속 테스트입니다 — 개발 서버에 계정·기록을 만들므로 AUTOTEST_SERVER=1 일 때만 돕니다 (끝난 뒤 cleanup_server.py 로 정리)")
+    if _server_ok and wants_server != _game_server_mode:
+        if _game_proc is None:
+            pytest.skip("이미 떠 있는 게임(폰 등)은 서버 접속 여부를 바꿀 수 없어 서버 테스트를 건너뜁니다")
+        _switch_game(wants_server)
     if _server_ok is None:
         _server_ok = False
         for _ in range(10):                       # 이미 떠 있는 게임(폰 adb 포워딩 등)이 있으면 그것을 쓴다
@@ -106,7 +133,8 @@ def require_server(request):
             # 없으면 PC에서 직접 띄운다. start_game 은 항상 --no-server 로 띄워 개발 서버에 계정·기록을 만들지 않는다(2026-11-07 사고).
             try:
                 from godot_runner import start_game
-                _game_proc = start_game()
+                _game_proc = start_game(allow_server=wants_server)
+                _game_server_mode = wants_server
                 _server_ok = True
             except Exception as e:
                 print(f"\n[conftest] 게임을 직접 띄우지 못했습니다: {e}")

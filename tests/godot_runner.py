@@ -21,15 +21,22 @@ APPDATA_DIR = os.environ.get(
 
 MARK = "@@UNIT@@ "
 GAME_APPDATA_DIR = os.path.join(REPO_ROOT, "tests", "reports", "_appdata_game")
+SERVER_APPDATA_DIR = os.path.join(REPO_ROOT, "tests", "reports", "_appdata_server")   # 서버 모드 전용 — 로그인 세션이 실행 사이에 남는다
 
 
-def start_game(timeout: int = 90) -> "subprocess.Popen":
-    """게임을 PC에서 띄운다. **항상 --no-server를 붙이고, 끄는 옵션은 두지 않는다**(2026-11-07).
-    그냥 띄우면 게임이 개발 서버에 익명 계정을 만든다(SupabaseHTTP._ready → ensure_session). 사용자 폴더도 건드리지 않게
-    APPDATA를 격리 폴더로 바꿔 준다. TestServer(포트 5000)가 응답할 때까지 기다렸다가 프로세스를 돌려준다."""
+def start_game(timeout: int = 90, allow_server: bool = False) -> "subprocess.Popen":
+    """게임을 PC에서 띄운다. **기본은 --no-server**(2026-11-07 사고: 그냥 띄우면 게임이 개발 서버에 익명 계정을 만든다 —
+    SupabaseHTTP._ready → ensure_session). 사용자 폴더도 건드리지 않게 APPDATA를 격리 폴더로 바꿔 준다.
+    TestServer(포트 5000)가 응답할 때까지 기다렸다가 프로세스를 돌려준다.
+
+    allow_server=True 는 서버 검증 테스트 전용 예외다(2026-11-08, 사용자 지시 "테스트를 위해 서버 접속은 예외로"):
+    --no-server 를 빼고, 서버 전용 APPDATA(세션이 남는 폴더)로 띄운다. 띄우기 전에 장부에 run_start 를 적고,
+    뜬 뒤 게임이 가진 서버 세션의 user_id 를 장부에 적는다. 장부에 없는 실계정으로 로그인돼 있으면 중단한다."""
     import time
     import urllib.request
-    os.makedirs(GAME_APPDATA_DIR, exist_ok=True)
+    import server_ledger
+    appdata = SERVER_APPDATA_DIR if allow_server else GAME_APPDATA_DIR
+    os.makedirs(appdata, exist_ok=True)
 
     def _ping() -> bool:
         try:
@@ -40,18 +47,42 @@ def start_game(timeout: int = 90) -> "subprocess.Popen":
 
     if _ping():
         raise RuntimeError("포트 5000에 이미 다른 게임이 떠 있습니다 — 그 게임을 시험 대상으로 착각하지 않도록 중단합니다.")
-    env = dict(os.environ, APPDATA=GAME_APPDATA_DIR)
-    cmd = [GODOT_EXE, "--path", GAME_PROJECT, "--windowed", "--resolution", "1920x864", "--position", "0,0", "--", "--no-server"]
+    env = dict(os.environ, APPDATA=appdata)
+    cmd = [GODOT_EXE, "--path", GAME_PROJECT, "--windowed", "--resolution", "1920x864", "--position", "0,0"]
+    if not allow_server:
+        cmd += ["--", "--no-server"]
+    else:
+        server_ledger.append("run_start", appdata=appdata)
     proc = subprocess.Popen(cmd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     deadline = time.time() + timeout
     while time.time() < deadline:
         if proc.poll() is not None:
             raise RuntimeError(f"게임이 시작 직후 종료됐습니다(종료코드 {proc.returncode})")
         if _ping():
+            if allow_server:
+                try:
+                    _register_launch_session()
+                except Exception:
+                    stop_game(proc)
+                    raise
             return proc
         time.sleep(1)
     stop_game(proc)
     raise RuntimeError(f"게임의 TestServer가 {timeout}초 안에 응답하지 않았습니다")
+
+
+def _register_launch_session() -> None:
+    """서버 모드로 뜬 게임의 세션(새 익명 계정이거나 저장돼 있던 세션)을 장부에 적는다. 장부에 없는 실계정이면 RuntimeError."""
+    import client
+    import server_ledger
+    s = client.supabase_session(wait=30)
+    uid = s.get("user_id", "")
+    if not s.get("session_ready") or not uid:
+        raise RuntimeError(f"서버 모드 게임이 30초 안에 서버 세션을 얻지 못했습니다: {s.get('last_auth_error')}")
+    known = server_ledger.accounts().get(uid)
+    if known is None and not s.get("is_anonymous"):
+        raise RuntimeError(f"장부에 없는 실계정({uid})으로 로그인돼 있습니다 — 서버 전용 폴더의 세션을 확인하세요")
+    server_ledger.register(uid, fixed=bool(known and known["fixed"]), label="launch")
 
 
 def stop_game(proc) -> None:
