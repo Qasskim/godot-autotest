@@ -67,6 +67,11 @@ def fill_input(text: str) -> bool:
     return bool(_req("POST", "/screen_input?" + urllib.parse.urlencode({"text": text})).get("ok"))
 
 
+def pick_option(n: int, item: str = "") -> dict:
+    """화면에 보이는 n번째 드롭다운에서 항목 글자를 고른다. item 이 비면 항목 목록·현재 값만 돌려준다 ({"ok","count","items","selected"})."""
+    return _req("POST", "/screen_option?" + urllib.parse.urlencode({"n": n, "item": item}))
+
+
 def service(op: str, timeout: float = 30.0, **params) -> dict:
     """라이벌·리더보드 서비스 함수를 게임 안에서 호출한다 (TestServer /debug_service). op 와 인자는 TestServer.gd 의 설명 참고. 결과 dict 를 돌려준다."""
     qs = urllib.parse.urlencode({"op": op, **params})
