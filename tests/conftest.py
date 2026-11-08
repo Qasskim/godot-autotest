@@ -110,16 +110,9 @@ def _switch_game(allow_server: bool) -> None:
     _game_server_mode = allow_server
 
 
-@pytest.fixture(autouse=True)
-def require_server(request):
+def _ensure_game(wants_server: bool) -> bool:
+    """게임이 떠 있게 한다(세션에서 처음 한 번만 확인). 떠 있는 게임이 있으면 쓰고, 없으면 PC에서 직접 띄운다. 쓸 게임이 있으면 True."""
     global _server_ok, _game_proc, _game_server_mode
-    if request.node.get_closest_marker("no_server"):
-        return
-    wants_server = bool(request.node.get_closest_marker("server"))
-    if _server_ok and wants_server != _game_server_mode:
-        if _game_proc is None:
-            pytest.skip("이미 떠 있는 게임(폰 등)은 서버 접속 여부를 바꿀 수 없어 서버 테스트를 건너뜁니다")
-        _switch_game(wants_server)
     if _server_ok is None:
         _server_ok = False
         for _ in range(10):                       # 이미 떠 있는 게임(폰 adb 포워딩 등)이 있으면 그것을 쓴다
@@ -128,7 +121,7 @@ def require_server(request):
                 break
             time.sleep(1)
         if not _server_ok and os.environ.get("AUTOTEST_AUTOLAUNCH", "1") != "0":
-            # 없으면 PC에서 직접 띄운다. start_game 은 항상 --no-server 로 띄워 개발 서버에 계정·기록을 만들지 않는다(2026-11-07 사고).
+            # 없으면 PC에서 직접 띄운다. start_game 은 기본으로 --no-server 로 띄워 개발 서버에 계정·기록을 만들지 않는다(2026-11-07 사고).
             try:
                 from godot_runner import start_game
                 _game_proc = start_game(allow_server=wants_server)
@@ -136,7 +129,28 @@ def require_server(request):
                 _server_ok = True
             except Exception as e:
                 print(f"\n[conftest] 게임을 직접 띄우지 못했습니다: {e}")
-    if _server_ok:
+    return bool(_server_ok)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def game_for_session(request):
+    """세션 시작 때 게임을 먼저 띄운다. 모듈 범위 fixture(예: test_autoplay 의 결과 fixture)가 테스트별 fixture(require_server)보다 먼저 만들어지기 때문에,
+    파일 실행 순서가 달라지면 게임이 없는 채로 fixture가 접속해 오류가 났다(2026-11-08 run_all 의 integration 단계에서 발견)."""
+    first = next((it for it in request.session.items if not it.get_closest_marker("no_server")), None)
+    if first is not None:
+        _ensure_game(bool(first.get_closest_marker("server")))
+
+
+@pytest.fixture(autouse=True)
+def require_server(request):
+    if request.node.get_closest_marker("no_server"):
+        return
+    wants_server = bool(request.node.get_closest_marker("server"))
+    if _server_ok and wants_server != _game_server_mode:
+        if _game_proc is None:
+            pytest.skip("이미 떠 있는 게임(폰 등)은 서버 접속 여부를 바꿀 수 없어 서버 테스트를 건너뜁니다")
+        _switch_game(wants_server)
+    if _ensure_game(wants_server):
         return
     pytest.skip("Godot TestServer에 연결할 수 없습니다 (포트 5000). 게임을 먼저 실행하거나 AUTOTEST_AUTOLAUNCH=1(기본)로 두세요.")
 
