@@ -9,6 +9,7 @@ TEST_SCENARIO.md 기반 전체 시나리오.
 pytest는 기본적으로 파일 내 함수 선언 순서대로 실행하므로, 아래 test_ 함수들은
 위에서 아래로 하나의 이어지는 플레이 흐름을 구성한다(법칙 4).
 """
+import hashlib
 import json
 import os
 import random
@@ -16,10 +17,24 @@ import time
 
 import client
 from conftest import record_case, record_na
+from godot_runner import GAME_PROJECT
 
 # 이어하기: run_all.py --resume 이 환경변수로 진행 파일을 알려 주면, 끝까지 통과한 곡을 적어 두었다가 다시 돌릴 때 건너뛴다.
 # 환경변수가 없으면(단독 실행) 아무것도 기록하지 않고 전부 돈다.
 _PROGRESS = os.environ.get("AUTOTEST_PROGRESS", "")
+
+
+def _chart_fingerprint(chart_path: str) -> str:
+    """채보 파일 내용의 해시(앞 16자). 이어하기에서 '통과했던 그 채보 그대로인가'를 알아보는 데 쓴다 — 채보가 바뀌었거나 새로 생겼으면 다시 돈다.
+    res:// 채보만 읽을 수 있고(게임 프로젝트 폴더), 그 밖의 경로는 읽지 못하므로 매번 다시 돌도록 시각을 넣는다.
+    채보 파일만 본다(키음·음원이 바뀐 것은 모른다)."""
+    if not chart_path.startswith("res://"):
+        return "external-" + str(time.time())
+    try:
+        with open(os.path.join(GAME_PROJECT, chart_path[len("res://"):].replace("/", os.sep)), "rb") as f:
+            return hashlib.sha1(f.read()).hexdigest()[:16]
+    except OSError:
+        return "unreadable-" + str(time.time())
 
 
 def _progress_done() -> set:
@@ -148,12 +163,14 @@ def test_04_play_every_chart():
     assert count > 0, "순회할 채보가 없습니다"
 
     already_done = _progress_done()
+    paths = songs_resp.get("paths", [])
     for i in range(count):
         title = titles[i] if i < len(titles) else f"index {i}"
         prefix = f"chart[{i}] {title}"
-        key = f"{i}|{title}"
+        # 이어하기 키 = 채보 경로 + 채보 파일 내용 해시. 채보가 바뀌었거나 새로 생겼으면 키가 달라서 다시 돈다(2026-11-08 사용자 지시).
+        key = f"{paths[i]}|{_chart_fingerprint(paths[i])}" if i < len(paths) else f"{i}|{title}"
         if key in already_done:
-            record_na(f"{prefix}: 이전 실행에서 통과해 건너뜀", "run_all.py --resume — 진행 파일에 통과로 기록된 곡")
+            record_na(f"{prefix}: 이전 실행에서 통과해 건너뜀", "run_all.py --resume — 같은 채보 파일로 통과 기록이 있는 곡")
             continue
         chart_ok = True
 
