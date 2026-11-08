@@ -24,6 +24,31 @@ def ping() -> bool:
         return False
 
 
+def post_json(path: str, body: dict, timeout=DEFAULT_TIMEOUT) -> dict:
+    """JSON 본문을 보내는 POST. 본문이 bytes 라서 http.client 가 헤더와 한 번에 보낸다(TestServer 는 처음 도착한 바이트만 읽는다)."""
+    req = urllib.request.Request(HOST + path, data=json.dumps(body).encode("utf-8"), method="POST",
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read().decode())
+
+
+def debug_submit_score(payload: dict, timeout: float = 30.0) -> dict:
+    """submit_score 엣지 함수에 payload 를 그대로 보내고 {"ok": bool, "response": ...} 를 돌려준다 (TestServer /debug_submit_score)."""
+    post_json("/debug_submit_score", payload)
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        st = _req("GET", "/debug_submit_score")
+        if st.get("status") == "done":
+            return json.loads(st["result"])
+        time.sleep(0.3)
+    raise AssertionError(f"submit_score 응답이 {timeout}초 안에 오지 않았습니다")
+
+
+def clear_server_records() -> bool:
+    """현재 로그인한 계정의 서버 기록(records·sequences)을 모두 지운다 (본인 행만 — RLS). 고정 테스트 계정 전용."""
+    return bool(_req("POST", "/debug_clear_server_records").get("ok"))
+
+
 def supabase_session(wait: float = 0.0) -> dict:
     """게임의 서버 세션 상태. wait>0 이면 session_ready 가 될 때까지(또는 --no-server 로 막힐 때까지) 기다린다."""
     deadline = time.time() + wait
