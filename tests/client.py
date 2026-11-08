@@ -53,6 +53,11 @@ def screen_labels() -> list:
     return [i["text"] for i in screen()["items"] if i["kind"] == "label"]
 
 
+def screen_images() -> list:
+    """화면에 보이는 그림(TextureRect) 중 파일 경로가 있는 것의 res:// 경로 목록."""
+    return [i["path"] for i in screen()["items"] if i["kind"] == "image"]
+
+
 def screen_buttons() -> list:
     return [i["text"] for i in screen()["items"] if i["kind"] == "button"]
 
