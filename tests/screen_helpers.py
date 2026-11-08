@@ -63,6 +63,15 @@ def labels() -> list:
     return [norm(t) for t in client.screen_labels()]
 
 
+def labels_and_inner() -> list:
+    """화면 글자 + 버튼 안쪽에 얹힌 글자(리더보드 줄처럼 줄 전체가 버튼인 경우의 칸 글자)를 줄바꿈 없이 정리한 목록."""
+    out = labels()
+    for i in client.screen()["items"]:
+        if i["kind"] == "button":
+            out += [norm(t) for t in i.get("inner", [])]
+    return out
+
+
 def stage_label(stage: int) -> str:
     return norm(f"Stage {stage + 1}\n{STAGE_TITLES[stage]}")
 
