@@ -77,6 +77,23 @@ Python 패키지는 배치 파일 실행 시 자동으로 설치됩니다 (`pip 
 
 각 배치 파일은 단독으로 실행 가능하며, 실행 중 진행 상황이 CMD 창에 그대로 표시됩니다.
 
+### 풀 테스트 한 번에 (2026-11-08)
+
+PC에서 게임을 자동으로 띄워 전부 돌린다(폰 연결 불필요). 진입점은 `tests/run_all.py` 하나:
+
+```
+python tests/run_all.py                     # 전부: unit → integration → server → full (몇 시간)
+python tests/run_all.py --quick             # unit 만 (헤드리스, 약 5분)
+python tests/run_all.py --stages unit,server    # 원하는 단계만
+python tests/run_all.py --resume            # 이전에 통과한 단계는 건너뛰고, full 은 끝까지 통과한 곡도 건너뜀
+python tests/run_all.py --cleanup           # server 단계 뒤 장부에 적힌 테스트 데이터를 실제로 삭제 (없으면 목록만)
+```
+
+- 단계: `unit`(마커 no_server 전부) · `integration`(게임 창 필요, `--no-server`) · `server`(개발 서버에 그대로 접속) · `full`(`test_full_scenario.py`, 마지막에 게임 종료).
+- **앞 단계가 실패해도 끝까지 돈다.** 끝에 단계별 합계 표가 나오고 `tests/reports/full_run_state.json`에 남는다. 엑셀(`test_results.xlsx`)에는 단계마다 시트가 쌓인다.
+- 이어하기: `--resume`이면 통과한 단계는 건너뛴다. `full`은 곡마다 끝까지 통과하면 `tests/reports/full_scenario_progress.json`에 적어 두었다가 다음에 그 곡을 건너뛴다(건너뛴 곡은 엑셀에 N/A로 남는다). `--resume` 없이 돌리면 진행 기록을 비우고 처음부터 돈다.
+- 처음 한 번(2026-11-08): unit 단계 735개 중 733 통과·2 알려진 문제(xfail)·실패 0 (5분 32초).
+
 ---
 
 ## 테스트 결과

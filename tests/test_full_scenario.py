@@ -9,11 +9,36 @@ TEST_SCENARIO.md 기반 전체 시나리오.
 pytest는 기본적으로 파일 내 함수 선언 순서대로 실행하므로, 아래 test_ 함수들은
 위에서 아래로 하나의 이어지는 플레이 흐름을 구성한다(법칙 4).
 """
+import json
+import os
 import random
 import time
 
 import client
 from conftest import record_case, record_na
+
+# 이어하기: run_all.py --resume 이 환경변수로 진행 파일을 알려 주면, 끝까지 통과한 곡을 적어 두었다가 다시 돌릴 때 건너뛴다.
+# 환경변수가 없으면(단독 실행) 아무것도 기록하지 않고 전부 돈다.
+_PROGRESS = os.environ.get("AUTOTEST_PROGRESS", "")
+
+
+def _progress_done() -> set:
+    try:
+        with open(_PROGRESS, encoding="utf-8") as f:
+            return set(json.load(f).get("charts", []))
+    except Exception:
+        return set()
+
+
+def _progress_add(key: str) -> None:
+    if not _PROGRESS:
+        return
+    done = _progress_done()
+    done.add(key)
+    tmp = _PROGRESS + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump({"charts": sorted(done)}, f, ensure_ascii=False)
+    os.replace(tmp, _PROGRESS)
 
 
 # ── 0. 앱 실행 ────────────────────────────────────────────────────────────
@@ -122,9 +147,15 @@ def test_04_play_every_chart():
     titles = songs_resp.get("songs", [])
     assert count > 0, "순회할 채보가 없습니다"
 
+    already_done = _progress_done()
     for i in range(count):
         title = titles[i] if i < len(titles) else f"index {i}"
         prefix = f"chart[{i}] {title}"
+        key = f"{i}|{title}"
+        if key in already_done:
+            record_na(f"{prefix}: 이전 실행에서 통과해 건너뜀", "run_all.py --resume — 진행 파일에 통과로 기록된 곡")
+            continue
+        chart_ok = True
 
         # SongSelect는 재진입마다 새 인스턴스라 _auto_play가 false로 초기화됨(디버그 구현상 정상) —
         # 곡마다 다시 켜줘야 함
@@ -134,7 +165,7 @@ def test_04_play_every_chart():
         entered = client.wait_for_scene("GameScene", timeout=15)
         record_case(f"{prefix}: GameScene 진입", entered)
         if not entered:
-            continue
+            continue                      # 통과 곡으로 기록하지 않음 → 이어하기에서 다시 돈다
 
         # 시작 카운트다운(3,2,1) 끝나기 전에 포즈를 걸면 실제 입력 경로(ESC)와 달리
         # GameManager._toggle_pause()가 카운트다운 상태를 무시하고 그대로 진행돼 버려서
@@ -164,6 +195,8 @@ def test_04_play_every_chart():
             client.tap_pause_quit()
             back_ok = client.wait_for_scene("SongSelect", timeout=10)
             record_case(f"{prefix}: 포즈 나가기 → SongSelect", back_ok)
+            if back_ok:
+                _progress_add(key)
             continue
 
         client.tap_pause_toggle()  # 재개
@@ -171,14 +204,18 @@ def test_04_play_every_chart():
         client.wait_game_finished()
         result_ok = client.wait_for_scene("ResultScreen", timeout=15)
         record_case(f"{prefix}: 완주 → ResultScreen 진입", result_ok)
+        chart_ok = chart_ok and result_ok
 
         if result_ok:
             res = client.result()
-            record_case(f"{prefix}: 결과값(score/grade) 정합성",
-                        "score" in res and "grade" in res, note=str(res)[:200])
+            res_ok = "score" in res and "grade" in res
+            record_case(f"{prefix}: 결과값(score/grade) 정합성", res_ok, note=str(res)[:200])
+            chart_ok = chart_ok and res_ok
 
         back_to_select = client.tap_until_scene("select_song", "SongSelect", timeout=15)
         record_case(f"{prefix}: 곡선택으로 복귀", back_to_select)
+        if chart_ok and back_to_select:
+            _progress_add(key)
 
     client.autoplay(False)
 
