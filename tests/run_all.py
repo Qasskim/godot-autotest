@@ -93,7 +93,7 @@ def main() -> int:
     ap.add_argument("--cleanup", action="store_true", help="server 단계 뒤 장부에 적힌 테스트 데이터를 실제로 삭제")
     args = ap.parse_args()
 
-    chosen = ["unit"] if args.quick else (args.stages.split(",") if args.stages else ORDER)
+    chosen = ["unit"] if args.quick else (args.stages.split(",") if args.stages else list(ORDER))   # ORDER 를 복사한다 — 같은 리스트를 정렬하면 정렬 도중 ORDER 가 변해 ValueError
     unknown = [s for s in chosen if s not in STAGES]
     if unknown:
         print(f"알 수 없는 단계: {unknown} (가능: {ORDER})")
