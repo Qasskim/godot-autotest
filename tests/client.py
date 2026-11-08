@@ -62,6 +62,27 @@ def press_text(text: str) -> bool:
     return bool(_req("POST", "/screen_press?" + urllib.parse.urlencode({"text": text})).get("ok"))
 
 
+def back() -> dict:
+    """안드로이드 뒤로가기 키와 같은 신호를 지금 화면에 보낸다."""
+    return _req("POST", "/back")
+
+
+def press_nth_button(n: int) -> bool:
+    """글자가 없는 아이콘 버튼용 — 화면에 보이는 버튼 중 n번째(트리 순서)를 누른다."""
+    return bool(_req("POST", f"/screen_press_nth?n={n}").get("ok"))
+
+
+def click(x: float, y: float, no_release: bool = False, release_only: bool = False) -> dict:
+    """화면 좌표에 터치를 보낸다. no_release=True 면 누르기만, release_only=True 면 떼기만(스와이프 끝점). 응답에 화면 크기(viewport_w/h)."""
+    q = f"/debug_click?x={x}&y={y}&touch=1&no_release={int(no_release)}&release_only={int(release_only)}"
+    return _req("POST", q)
+
+
+def viewport() -> tuple:
+    r = click(-5, -5)                                    # 화면 밖 좌표라 아무 데도 닿지 않는다
+    return r["viewport_w"], r["viewport_h"]
+
+
 def fill_input(text: str) -> bool:
     """화면에 보이는 입력창에 글자를 채운다."""
     return bool(_req("POST", "/screen_input?" + urllib.parse.urlencode({"text": text})).get("ok"))
