@@ -44,6 +44,19 @@ def debug_submit_score(payload: dict, timeout: float = 30.0) -> dict:
     raise AssertionError(f"submit_score 응답이 {timeout}초 안에 오지 않았습니다")
 
 
+def service(op: str, timeout: float = 30.0, **params) -> dict:
+    """라이벌·리더보드 서비스 함수를 게임 안에서 호출한다 (TestServer /debug_service). op 와 인자는 TestServer.gd 의 설명 참고. 결과 dict 를 돌려준다."""
+    qs = urllib.parse.urlencode({"op": op, **params})
+    _req("POST", f"/debug_service?{qs}")
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        st = _req("GET", "/debug_service")
+        if st.get("status") == "done":
+            return json.loads(st["result"])
+        time.sleep(0.3)
+    raise AssertionError(f"서비스 호출 {op} 응답이 {timeout}초 안에 오지 않았습니다")
+
+
 def clear_server_records() -> bool:
     """현재 로그인한 계정의 서버 기록(records·sequences)을 모두 지운다 (본인 행만 — RLS). 고정 테스트 계정 전용."""
     return bool(_req("POST", "/debug_clear_server_records").get("ok"))
