@@ -2,7 +2,7 @@
 """
 TEST_SCENARIO.md 기반 전체 시나리오.
 
-주의: 이 파일은 맨 마지막에 MainMenu QUIT 버튼으로 게임을 실제 종료시킨다.
+주의: 이 파일은 맨 마지막에 MainMenu 뒤로가기 2번으로 게임을 실제 종료시킨다.
       다른 테스트 파일과 함께 `pytest -v` 로 묶어서 돌리면 이후 파일들이 서버 응답 없음으로
       전부 실패하므로, 반드시 단독 실행할 것: `pytest test_full_scenario.py -v`
 
@@ -52,7 +52,7 @@ def test_00_mainmenu_entry():
     assert client.wait_for_scene("MainMenu", timeout=15)
 
 
-# ── 1. MainMenu (QUIT 버튼 제외 — 맨 마지막에 별도 테스트) ───────────────────
+# ── 1. MainMenu (종료 확인 제외 — 맨 마지막에 별도 테스트) ───────────────────
 
 def test_01_mainmenu_back_once_shows_exit_warning():
     """뒤로가기 1회는 종료 경고만 뜨고 앱은 종료되지 않아야 한다."""
@@ -233,7 +233,9 @@ def test_05_songselect_back_button():
 
 
 def test_05_mainmenu_quit_normal_exit():
-    client.tap_mainmenu_quit()
+    """MainMenu 에 QUIT 버튼은 더 없다(UI/UX 퀄업 1차에서 사라짐). 종료 경로는 뒤로가기 2번(3초 안, ExitOnDoubleBack) — 사용자 결정 2026-11-08."""
+    client.tap_mainmenu_back()
+    client.tap_mainmenu_back()
     shut_down = client.wait_for_shutdown(timeout=15)
-    record_case("MainMenu: QUIT 버튼 → 정상 종료", shut_down)
-    assert shut_down, "QUIT 이후에도 서버가 응답함 — 프로세스가 정상 종료되지 않은 것으로 의심됨"
+    record_case("MainMenu: 뒤로가기 2번 → 정상 종료", shut_down)
+    assert shut_down, "뒤로가기 2번 이후에도 서버가 응답함 — 프로세스가 정상 종료되지 않은 것으로 의심됨"
