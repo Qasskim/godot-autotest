@@ -44,6 +44,29 @@ def debug_submit_score(payload: dict, timeout: float = 30.0) -> dict:
     raise AssertionError(f"submit_score 응답이 {timeout}초 안에 오지 않았습니다")
 
 
+def screen() -> dict:
+    """지금 화면에 실제로 보이는 글자 — {"scene": 씬 이름, "items": [{"kind": label|button|edit, "text": ...}]} (TestServer /screen_texts)."""
+    return _req("GET", "/screen_texts")
+
+
+def screen_labels() -> list:
+    return [i["text"] for i in screen()["items"] if i["kind"] == "label"]
+
+
+def screen_buttons() -> list:
+    return [i["text"] for i in screen()["items"] if i["kind"] == "button"]
+
+
+def press_text(text: str) -> bool:
+    """화면에 보이는 버튼을 글자로 찾아 누른다. 그 글자의 보이는 버튼이 없으면 False."""
+    return bool(_req("POST", "/screen_press?" + urllib.parse.urlencode({"text": text})).get("ok"))
+
+
+def fill_input(text: str) -> bool:
+    """화면에 보이는 입력창에 글자를 채운다."""
+    return bool(_req("POST", "/screen_input?" + urllib.parse.urlencode({"text": text})).get("ok"))
+
+
 def service(op: str, timeout: float = 30.0, **params) -> dict:
     """라이벌·리더보드 서비스 함수를 게임 안에서 호출한다 (TestServer /debug_service). op 와 인자는 TestServer.gd 의 설명 참고. 결과 dict 를 돌려준다."""
     qs = urllib.parse.urlencode({"op": op, **params})

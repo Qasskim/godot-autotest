@@ -24,14 +24,16 @@ GAME_APPDATA_DIR = os.path.join(REPO_ROOT, "tests", "reports", "_appdata_game")
 SERVER_APPDATA_DIR = os.path.join(REPO_ROOT, "tests", "reports", "_appdata_server")   # 서버 모드 전용 — 로그인 세션이 실행 사이에 남는다
 
 
-def start_game(timeout: int = 90, allow_server: bool = False) -> "subprocess.Popen":
+def start_game(timeout: int = 90, allow_server: bool = False, fresh_profile: bool = False) -> "subprocess.Popen":
     """게임을 PC에서 띄운다. **기본은 --no-server**(2026-11-07 사고: 그냥 띄우면 게임이 개발 서버에 익명 계정을 만든다 —
     SupabaseHTTP._ready → ensure_session). 사용자 폴더도 건드리지 않게 APPDATA를 격리 폴더로 바꿔 준다.
     TestServer(포트 5000)가 응답할 때까지 기다렸다가 프로세스를 돌려준다.
 
     allow_server=True 는 서버 검증 테스트 전용 예외다(2026-11-08, 사용자 지시 "테스트를 위해 서버 접속은 예외로"):
     --no-server 를 빼고, 서버 전용 APPDATA(세션이 남는 폴더)로 띄운다. 띄우기 전에 장부에 run_start 를 적고,
-    뜬 뒤 게임이 가진 서버 세션의 user_id 를 장부에 적는다. 장부에 없는 실계정으로 로그인돼 있으면 중단한다."""
+    뜬 뒤 게임이 가진 서버 세션의 user_id 를 장부에 적는다. 장부에 없는 실계정으로 로그인돼 있으면 중단한다.
+
+    fresh_profile=True 는 '게임을 처음 설치해 처음 켠 상태'(빈 프로필)로 띄운다 — 처음 실행 흐름(로고→타이틀→로그인→닉네임→튜토리얼)을 확인하는 테스트 전용."""
     import time
     import urllib.request
     import server_ledger
@@ -47,7 +49,7 @@ def start_game(timeout: int = 90, allow_server: bool = False) -> "subprocess.Pop
 
     if _ping():
         raise RuntimeError("포트 5000에 이미 다른 게임이 떠 있습니다 — 그 게임을 시험 대상으로 착각하지 않도록 중단합니다.")
-    _seed_profile(appdata)
+    _seed_profile(appdata, fresh_profile)
     env = dict(os.environ, APPDATA=appdata)
     cmd = [GODOT_EXE, "--path", GAME_PROJECT, "--windowed", "--resolution", "1920x864", "--position", "0,0"]
     if not allow_server:
@@ -72,13 +74,20 @@ def start_game(timeout: int = 90, allow_server: bool = False) -> "subprocess.Pop
     raise RuntimeError(f"게임의 TestServer가 {timeout}초 안에 응답하지 않았습니다")
 
 
-def _seed_profile(appdata: str) -> None:
+def _seed_profile(appdata: str, fresh: bool = False) -> None:
     """격리 APPDATA 의 프로필에 '튜토리얼·온보딩을 이미 마친' 표시를 미리 적어 둔다.
     빈 프로필로 시작하면 MainMenu 의 PLAY 가 곡 선택이 아니라 튜토리얼로 가서(MainMenu._activate → has_seen_tutorial),
     풀 시나리오의 'PLAY → SongSelect' 가 이어지지 않는다(2026-11-08 run_all 의 full 단계에서 발견). 폰에서 쓰던 이미 한 번 쓴 프로필과 같은 상태로 맞춘다.
     튜토리얼·온보딩 화면 자체는 이 테스트로 검증하지 않는다(사람이 확인)."""
     path = os.path.join(appdata, "RhythmGame_New", "profile.json")
     os.makedirs(os.path.dirname(path), exist_ok=True)
+    # 화면 문구를 사양서(한국어)와 비교하므로 언어를 한국어로 고정한다. 없으면 게임이 이 PC의 시스템 언어로 정한다(Locale._detect_system_lang).
+    with open(os.path.join(os.path.dirname(path), "lang_pref.txt"), "w", encoding="utf-8") as f:
+        f.write("ko")
+    if fresh:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("{}")
+        return
     try:
         with open(path, encoding="utf-8") as f:
             profile = json.load(f)
