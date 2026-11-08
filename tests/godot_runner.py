@@ -86,10 +86,13 @@ def _seed_profile(appdata: str) -> None:
             profile = {}
     except Exception:
         profile = {}
-    if profile.get("tutorial_seen") and profile.get("onboarding_done"):
+    if profile.get("tutorial_seen") and profile.get("onboarding_done") and profile.get("display_name"):
         return
     profile["tutorial_seen"] = True
     profile["onboarding_done"] = True
+    # 닉네임이 없으면 MainMenu 가 취소할 수 없는 '닉네임 설정' 팝업을 띄워(NicknameGate.require) 뒤로가기가 무시된다 —
+    # 풀 시나리오 마지막의 뒤로가기 2번 종료가 안 되던 원인(2026-11-08, 화면 캡처로 확인).
+    profile["display_name"] = profile.get("display_name") or "AutoTest"
     with open(path, "w", encoding="utf-8") as f:
         json.dump(profile, f, ensure_ascii=False)
 
