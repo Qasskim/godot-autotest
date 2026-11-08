@@ -20,7 +20,7 @@ _case_num = 0
 def pytest_configure(config):
     config.addinivalue_line("markers", "slow: 게임 플레이 대기가 필요한 느린 테스트")
     config.addinivalue_line("markers", "no_server: TestServer(게임 실행) 없이 도는 테스트 — 서버 연결 확인과 실패 스크린샷을 건너뜀")
-    config.addinivalue_line("markers", "server: 개발 서버(Supabase)에 실제로 접속하는 테스트 — AUTOTEST_SERVER=1 일 때만 돌고, 게임을 --no-server 없이 띄운다. 만든 계정은 server_ledger.jsonl 에 적힌다")
+    config.addinivalue_line("markers", "server: 개발 서버(Supabase)에 그대로 접속하는 테스트 — 게임을 --no-server 없이 띄운다. 만든 계정은 server_ledger.jsonl 에 적힌다")
     global _wb, _ws
     _wb, _ws = init_workbook()
 
@@ -116,8 +116,6 @@ def require_server(request):
     if request.node.get_closest_marker("no_server"):
         return
     wants_server = bool(request.node.get_closest_marker("server"))
-    if wants_server and os.environ.get("AUTOTEST_SERVER", "0") != "1":
-        pytest.skip("서버 접속 테스트입니다 — 개발 서버에 계정·기록을 만들므로 AUTOTEST_SERVER=1 일 때만 돕니다 (끝난 뒤 cleanup_server.py 로 정리)")
     if _server_ok and wants_server != _game_server_mode:
         if _game_proc is None:
             pytest.skip("이미 떠 있는 게임(폰 등)은 서버 접속 여부를 바꿀 수 없어 서버 테스트를 건너뜁니다")
