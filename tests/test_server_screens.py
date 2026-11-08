@@ -88,6 +88,8 @@ def test_best_score_tab_shows_current_number_one(seeded):
     want = f"{seeded['ex_max']} / {seeded['ex_max']}"
     assert want in labels(), f"1위 점수가 '{want}' 이 아닙니다: {labels()}"
     assert norm(f"100.00%  {seeded['b_resp']['record']['grade']}") in labels(), f"1위 달성률·등급이 다릅니다: {labels()}"
+    replay_on = client._req("GET", "/remote_config?key=replay_enabled")["enabled"]
+    assert (ui("select_replay_btn") in buttons()) == replay_on, f"리플레이 버튼 표시가 원격 설정(replay_enabled={replay_on})과 다릅니다: {buttons()}"
 
 
 # ── 전체 리더보드 화면 ──────────────────────────────────────────────
