@@ -47,6 +47,7 @@ def start_game(timeout: int = 90, allow_server: bool = False) -> "subprocess.Pop
 
     if _ping():
         raise RuntimeError("포트 5000에 이미 다른 게임이 떠 있습니다 — 그 게임을 시험 대상으로 착각하지 않도록 중단합니다.")
+    _seed_profile(appdata)
     env = dict(os.environ, APPDATA=appdata)
     cmd = [GODOT_EXE, "--path", GAME_PROJECT, "--windowed", "--resolution", "1920x864", "--position", "0,0"]
     if not allow_server:
@@ -69,6 +70,28 @@ def start_game(timeout: int = 90, allow_server: bool = False) -> "subprocess.Pop
         time.sleep(1)
     stop_game(proc)
     raise RuntimeError(f"게임의 TestServer가 {timeout}초 안에 응답하지 않았습니다")
+
+
+def _seed_profile(appdata: str) -> None:
+    """격리 APPDATA 의 프로필에 '튜토리얼·온보딩을 이미 마친' 표시를 미리 적어 둔다.
+    빈 프로필로 시작하면 MainMenu 의 PLAY 가 곡 선택이 아니라 튜토리얼로 가서(MainMenu._activate → has_seen_tutorial),
+    풀 시나리오의 'PLAY → SongSelect' 가 이어지지 않는다(2026-11-08 run_all 의 full 단계에서 발견). 폰에서 쓰던 이미 한 번 쓴 프로필과 같은 상태로 맞춘다.
+    튜토리얼·온보딩 화면 자체는 이 테스트로 검증하지 않는다(사람이 확인)."""
+    path = os.path.join(appdata, "RhythmGame_New", "profile.json")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    try:
+        with open(path, encoding="utf-8") as f:
+            profile = json.load(f)
+        if not isinstance(profile, dict):
+            profile = {}
+    except Exception:
+        profile = {}
+    if profile.get("tutorial_seen") and profile.get("onboarding_done"):
+        return
+    profile["tutorial_seen"] = True
+    profile["onboarding_done"] = True
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(profile, f, ensure_ascii=False)
 
 
 def _register_launch_session() -> None:
