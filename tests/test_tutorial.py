@@ -15,12 +15,6 @@ from screen_helpers import (DIALOGUE, HAS_START, enter_tutorial_via_play, enter_
 PREV, NEXT = ui("tutorial_prev_btn"), ui("tutorial_next_btn")
 # 각 단계에서 '다음'만 눌러 닿을 수 있는 마지막 대사 번호 — 노트가 있는 단계는 마지막 대사에서 START, 5단계는 1번 대사에서 YES/NO 로 바뀐다
 LAST_BY_NEXT = {0: 6, 1: 3, 2: 3, 3: 1, 4: 1}
-# 사양서(docs/TUTORIAL_SPEC.md §4 표)와 게임 문구가 다른 두 줄 — (단계, 대사 번호): 게임에 실제로 나오는 문구. 어느 쪽이 맞는지 정해지면 한쪽을 고치고 여기서 지운다.
-# 아래 순회 테스트는 이 두 줄을 게임 문구로 비교하고, 사양서 문구와의 비교는 맨 끝 xfail 테스트가 맡는다.
-GAME_WORDING = {
-    (2, 1): "가운데 버튼을 누르면 준비가 되고, 3, 2, 1 카운트다운 뒤에 레인믹스에 진입해요. 누르지 않으면 지금 레인 그대로 이어져요.",
-    (2, 2): "레인믹스를 실행할지는 여러분이 직접 선택할 수 있어요.",
-}
 
 
 def buttons() -> list:
@@ -57,7 +51,7 @@ def test_next_shows_the_stage_dialogue_in_order(stage):
     enter_tutorial_via_play()
     jump_to_stage(stage)
     for i in range(LAST_BY_NEXT[stage] + 1):
-        want = GAME_WORDING.get((stage, i), DIALOGUE[stage][i])
+        want = DIALOGUE[stage][i]
         assert want in labels(), f"Stage {stage + 1} {i + 1}번째 대사가 다릅니다 — 화면: {labels()}"
         assert stage_label(stage) in labels()
         if i < LAST_BY_NEXT[stage]:
@@ -221,11 +215,3 @@ def test_settings_replay_finish_returns_to_settings_not_song_select():
     assert "OK" in buttons()
     press("OK")
     assert client.wait_for_scene("Settings", timeout=10), "끝까지 마쳤는데 설정 화면으로 돌아오지 않았습니다"
-
-
-@pytest.mark.parametrize("line", [1, 2])
-@pytest.mark.xfail(strict=True, reason="사양서 §4 표와 게임 문구가 다름(Stage 3의 2·3번째 대사) — 어느 쪽이 맞는지 사용자 결정 대기")
-def test_known_wording_difference_stage3_matches_spec_exactly(line):
-    enter_tutorial_via_play()
-    jump_to_stage(2, line)
-    assert DIALOGUE[2][line] in labels()
