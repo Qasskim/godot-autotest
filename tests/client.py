@@ -225,6 +225,16 @@ def autoplay_live(on: bool) -> dict:
     return _req("POST", f"/debug_autoplay_live?on={int(on)}")
 
 
+def notes_on_screen() -> dict:
+    """플레이 중 판정 대기 노트의 배치 {music_ms, key_mode, notes:[{lane, key_mode, timing_ms, cx, type}]} — cx 는 그려지는 가로 중심(기준 화면 좌표)."""
+    return _req("GET", "/debug_notes")
+
+
+def calibration(ms: float) -> dict:
+    """사용자 보정값(ms)을 이번 실행에서만 바꾼다(저장 안 함)."""
+    return _req("POST", f"/debug_calibration?ms={ms}")
+
+
 def play_state() -> dict:
     """플레이 중 점수 상태 {ex, max_ex, judged(지금까지 판정된 노트 수), target_accuracy(0~1, 목표 없으면 0), ghost_active}."""
     return _req("GET", "/debug_play_state")
