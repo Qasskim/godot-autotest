@@ -199,6 +199,16 @@ def judge_note_state() -> dict:
     return _req("GET", "/debug_judge_note")
 
 
+def lanemix_prompt() -> dict:
+    """플레이 중 레인믹스 안내 상태 {state: HIDDEN|OFFER|READY|RETURN, count, from_mode, to_mode, button_x, button_y, key_mode}."""
+    return _req("GET", "/debug_lanemix_prompt")
+
+
+def autolanemix(on: bool) -> dict:
+    """자동 플레이 중 레인믹스 안내를 자동으로 수락할지(기본 켬)."""
+    return _req("POST", f"/autolanemix/{'on' if on else 'off'}")
+
+
 def play_state() -> dict:
     """플레이 중 점수 상태 {ex, max_ex, judged(지금까지 판정된 노트 수), target_accuracy(0~1, 목표 없으면 0), ghost_active}."""
     return _req("GET", "/debug_play_state")
