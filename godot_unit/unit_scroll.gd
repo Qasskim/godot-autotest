@@ -119,7 +119,8 @@ func _note_y_and_scale() -> void:
 	var pos: Vector2 = c.get_note_position(5000.0, 3)
 	near("노트 위치: 판정 시각 노트는 판정선 Y에 레인 X × 1.0", pos.y, line)
 	near("노트 위치: X", pos.x, LaneSystem.get_lane_x(3))
-	eq("지난 노트 판단: 기본 150ms를 넘으면 지난 것", [c.is_past_judgment(4850.0), c.is_past_judgment(4849.0)], [false, true])
+	var oops: float = GameBalance.judgment_windows["Oops"]
+	eq("지난 노트 판단: Oops 창(GameBalance, 250ms)을 넘으면 지난 것", [c.is_past_judgment(5000.0 - oops), c.is_past_judgment(5000.0 - oops - 1.0)], [false, true])
 
 
 # ── 화면 비례 레이아웃 (DESIGN §1: 모든 화면비에서 레터박스 없이 정상 동작) ─────────────
