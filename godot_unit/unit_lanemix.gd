@@ -42,6 +42,7 @@ func run() -> Array:
 	_random_targets()
 	_super_random()
 	_activation()
+	_key_mode_at()
 	_entry_notice()
 	_entry_offer_arm()
 	_entry_previews()
@@ -254,6 +255,53 @@ func _activation() -> void:
 	rs.super_sequences[0] = [4]
 	rs.reset()
 	eq("초기화: reset은 섹션·결정·이벤트·슈퍼 시퀀스·진행 상태를 모두 비움", [rs.sections.size(), rs.resolved.size(), rs.events.size(), rs.super_sequences.size(), rs.is_active, rs.active_idx, rs.pending_idx], [0, 0, 0, 0, false, -1, -1])
+
+
+
+# ── 노트가 판정선에 닿을 때의 키 수 (DESIGN §9 구간 끝·단계 직후 노트 배치) ──────────────
+# 시험값(시각·키 수)은 사용자가 정한 값이 아니라 시험 작성자가 손으로 정한 것이다(2026-11-10).
+func _key_mode_at() -> void:
+	var lm := _state([_sec(0.0, 10000.0, 5)])
+	lm.events = [
+		{"ms": 0.0, "action": "lanemix_start", "target_mode": 5},
+		{"ms": 3000.0, "action": "lanemix_step", "target_mode": 6},
+		{"ms": 6000.0, "action": "lanemix_step", "target_mode": 8},
+		{"ms": 10000.0, "action": "lanemix_end"},
+	]
+	eq("키 수 계산: 진행 중인 구간이 없으면 지금 키 수 그대로", lm.key_mode_at(5000.0, 5, 4), 5)
+	lm.activate_lanemix(0)
+	lm.event_idx = 1
+	eq("키 수 계산: 첫 단계 전 노트는 지금 키 수", lm.key_mode_at(2999.0, 5, 4), 5)
+	eq("키 수 계산: 첫 단계 시각 노트는 그 단계 키 수", lm.key_mode_at(3000.0, 5, 4), 6)
+	eq("키 수 계산: 두 번째 단계 전", lm.key_mode_at(5999.0, 5, 4), 6)
+	eq("키 수 계산: 두 번째 단계 시각", lm.key_mode_at(6000.0, 5, 4), 8)
+	eq("키 수 계산: 구간 끝 직전은 마지막 단계 키 수", lm.key_mode_at(9999.0, 5, 4), 8)
+	eq("키 수 계산: 구간 끝 시각 이후는 base 키 수", [lm.key_mode_at(10000.0, 5, 4), lm.key_mode_at(12000.0, 5, 4)], [4, 4])
+	lm.event_idx = 2
+	eq("키 수 계산: 처리한 단계는 다시 적용하지 않고 지금 키 수에서 이어 감", [lm.key_mode_at(4000.0, 6, 4), lm.key_mode_at(6500.0, 6, 4)], [6, 8])
+	lm.end_section()
+	eq("키 수 계산: 구간이 끝나 진행 중이 아니면 지금 키 수 그대로", lm.key_mode_at(12000.0, 4, 4), 4)
+
+	# 슈퍼랜덤 — 순서(시퀀스)에서 아직 꺼내지 않은 값을 단계 순서대로 미리 적용
+	var sp := _state([_sec(0.0, 10000.0, LaneMixState.SUPER_RANDOM_TARGET)])
+	sp.events = lm.events
+	sp.super_sequences[0] = [5, 6, 8, 4]
+	sp.super_cursor[0] = 1
+	sp.activate_lanemix(0)
+	sp.event_idx = 1
+	eq("슈퍼랜덤 키 수: 첫 단계는 시퀀스 2번째, 두 번째 단계는 3번째", [sp.key_mode_at(3000.0, 5, 4), sp.key_mode_at(6000.0, 5, 4)], [6, 8])
+	sp.super_cursor[0] = 2     # 첫 단계 이벤트를 처리하는 중(값을 이미 꺼내 커서가 넘어간 상태)
+	eq("슈퍼랜덤 키 수: 이벤트 처리 중(skip)에는 지금 이벤트를 건너뛰고 다음 단계만 적용", sp.key_mode_at(7000.0, 6, 4, true), 8)
+	eq("슈퍼랜덤 키 수: 시퀀스가 소진돼 있으면 지금 키 수 유지", _exhausted_super_mode(), 5)
+
+
+func _exhausted_super_mode() -> int:
+	var sp := _state([_sec(0.0, 10000.0, LaneMixState.SUPER_RANDOM_TARGET)])
+	sp.events = [{"ms": 3000.0, "action": "lanemix_step", "target_mode": 0}]
+	sp.super_sequences[0] = [5]
+	sp.super_cursor[0] = 1
+	sp.activate_lanemix(0)
+	return sp.key_mode_at(5000.0, 5, 4)
 
 
 # ── 진입 안내 (DESIGN §9: lanemix_start 2마디 전부터 안내, 앞 구간 진행 중엔 안내 없음) ──
