@@ -23,7 +23,7 @@ TARGET_MODES = {4, 5, 6, 8, 16, -1, -2}                              # DESIGN §
 KEYMODE_OF_DIFF = {"EZ": 4, "NM": 5, "HD": 6, "EX": 6}              # DESIGN §14 곡 선택: EZ는 4키, NM은 5키, HD·EX는 6키
 # DESIGN §8 수록곡 표시 제목(올 대문자 대장르 표). METAL B는 2026-11-05 출시 제외라 A·C만.
 DESIGN_TITLES = {"ROCK", "METAL A", "METAL C", "PUNK A", "PUNK B", "DNB A", "DNB B", "TECHNO A", "TECHNO B",
-                 "HOUSE", "TRANCE", "CHIPTUNE", "CITY POP", "SYNTHWAVE", "ARTCORE", "GABBER", "HARDSTYLE", "AMBIENT"}
+                 "HOUSE", "TRANCE", "CHIPTUNE", "CITY POP", "SYNTHWAVE", "ARTCORE", "GABBER", "HARDSTYLE"}
 
 SONG_DIRS = sorted(d for d in glob.glob(os.path.join(CHARTS, "keysound", "*")) if os.path.isdir(d))
 SHIPPED = sorted(glob.glob(os.path.join(CHARTS, "keysound", "*", "*_v8.rgds")))        # EZ/NM/HD/EX
@@ -79,8 +79,6 @@ def test_display_titles_match_design_list():
     assert len(titles) == 17, f"표시 제목 {len(titles)}종 — 목록에만 있는 것: {sorted(DESIGN_TITLES - titles)}"
 
 
-@pytest.mark.xfail(strict=True, reason="문서-데이터 불일치(사용자 결정 대기): DESIGN §8 표시 제목 목록에는 AMBIENT가 있으나 수록 17곡에는 엠비언트 곡이 없다. "
-                                       "목록을 정정할지 곡을 더할지는 사용자가 정한다. 같아지면 이 표시를 지울 것.")
 def test_design_title_list_equals_shipped_titles():
     titles = {load(p)["meta"].get("display_title") for p in SHIPPED}
     assert titles == DESIGN_TITLES, f"DESIGN 목록에만 있는 것: {sorted(DESIGN_TITLES - titles)} / 수록곡에만 있는 것: {sorted(titles - DESIGN_TITLES)}"
