@@ -138,9 +138,10 @@ def test_nickname_popup_invalid_names_show_errors_and_valid_name_is_saved_then_r
 # ── 게임 탭 ─────────────────────────────────────────────────────────
 
 def test_game_tab_audio_offset_matches_saved_calibration():
-    open_settings(ui("settings_game_tab"))
     text = open(os.path.join(APP, "calibration.cfg"), encoding="utf-8").read()
     ms = float(re.search(r"user_calibration_ms=(-?[\d.]+)", text).group(1))
+    client.calibration(ms)      # 매 시험 전에 보정이 0으로 돌아가므로(conftest, 2026-11-10) 저장된 값을 지금 값으로 맞춘 뒤 화면과 비교한다
+    open_settings(ui("settings_game_tab"))
     assert norm(ui("settings_audio_offset") % ms) in labels(), f"오디오 오프셋 줄이 저장값 {ms} 와 다릅니다: {labels()}"
     assert ui("settings_language_label") in labels() and ui("settings_visual_theme_label") in labels()
 
