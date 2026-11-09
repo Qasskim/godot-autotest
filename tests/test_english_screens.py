@@ -24,10 +24,7 @@ def nickname() -> str:
     return json.load(open(os.path.join(APP, "profile.json"), encoding="utf-8")).get("display_name", "")
 
 
-THEME_NAMES = ["아스트랄 오션", "코스믹 네온", "어비스 에테르"]      # PaletteManager.get_theme_list 에 한글로만 적혀 있음 — 아래 별도 xfail 테스트가 맡는다
-
-
-def korean_found(skip_theme_names: bool = False) -> list:
+def korean_found() -> list:
     """지금 화면에서 한글이 들어간 글자 — 닉네임 줄·언어 이름은 제외."""
     nick = nickname()
     out = []
@@ -39,13 +36,13 @@ def korean_found(skip_theme_names: bool = False) -> list:
         elif i["kind"] == "edit":
             texts += [i["text"], i["placeholder"]]
         for t in texts:
-            if HANGUL.search(t) and not (nick and nick in t) and t != "한국어" and not (skip_theme_names and t in THEME_NAMES):
+            if HANGUL.search(t) and not (nick and nick in t) and t != "한국어":
                 out.append(t)
     return out
 
 
-def assert_english(where: str, skip_theme_names: bool = False) -> None:
-    ko = korean_found(skip_theme_names)
+def assert_english(where: str) -> None:
+    ko = korean_found()
     assert not ko, f"영어 화면({where})에 한글이 남아 있습니다: {ko}"
 
 
@@ -97,7 +94,7 @@ def test_settings_tabs_have_no_korean(tab):
     time.sleep(0.8)
     assert client.select_tab(ui(tab, "en"))
     time.sleep(0.4)
-    assert_english("설정 " + tab, skip_theme_names=True)
+    assert_english("설정 " + tab)
     if tab == "settings_sound_tab":
         press(ui("settings_eq_title", "en"))
         time.sleep(0.4)
@@ -108,7 +105,6 @@ def test_settings_tabs_have_no_korean(tab):
         assert_english("닉네임 팝업")
 
 
-@pytest.mark.xfail(strict=True, reason="비주얼 테마 이름이 한국어로만 적혀 있어 영어 화면에도 한글로 나옴(PaletteManager.get_theme_list) — 번역할지 사용자 결정 대기")
 def test_visual_theme_names_are_not_korean_in_english():
     client.navigate("main_menu")
     client.wait_for_scene("MainMenu", timeout=10)
