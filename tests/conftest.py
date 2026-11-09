@@ -158,6 +158,12 @@ def require_server(request):
             pytest.skip("이미 떠 있는 게임(폰 등)은 서버 접속 여부·시작 상태를 바꿀 수 없어 이 테스트를 건너뜁니다")
         _switch_game(wants_server, wants_fresh)
     if _ensure_game(wants_server, wants_fresh):
+        # 매 시험 전에 사용자 보정을 0으로 되돌린다(2026-11-10). 시험용 프로필에 설정 화면 시험이 저장한 보정(196ms)이 남아 있고,
+        # Miss 확정이 보정을 쓰게 된 뒤로는 보정 0을 가정한 시험(판정 표시 등)이 이 값 때문에 어긋났다. 보정이 필요한 시험은 본문에서 직접 지정한다.
+        try:
+            client.calibration(0.0)
+        except Exception:
+            pass
         return
     pytest.skip("Godot TestServer에 연결할 수 없습니다 (포트 5000). 게임을 먼저 실행하거나 AUTOTEST_AUTOLAUNCH=1(기본)로 두세요.")
 

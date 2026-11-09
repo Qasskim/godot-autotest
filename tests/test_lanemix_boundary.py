@@ -29,6 +29,7 @@ def _leave_after():
     yield
     pb.COMBO = None
     pb.WINDOW_MS = 0
+    client.calibration(0.0)      # 보정이 다음 시험으로 새지 않게(2026-11-10: 예전엔 143 이 남아 뒤 시험이 그 보정으로 돌았다)
     try:
         pb.leave()
     except Exception:  # noqa: BLE001 — 정리 실패가 시험 결과를 덮지 않게
