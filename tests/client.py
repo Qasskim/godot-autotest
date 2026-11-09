@@ -189,9 +189,10 @@ def tap(action: str) -> dict:
     return _req("POST", f"/tap/{action}")
 
 
-def judge_note(offset_ms: float, press: bool = True) -> dict:
+def judge_note(offset_ms: float, press: bool = True, after_ms: float = None) -> dict:
     """플레이 중 다음 단노트 하나를 골라 '노트 시각 + offset_ms' 에 그 레인을 터치한다(곡 시계 기준). press=False 면 안 치고 지나가게 둔다(Miss)."""
-    return _req("POST", f"/debug_judge_note?offset_ms={offset_ms}&press={int(press)}")
+    extra = "" if after_ms is None else f"&after_ms={after_ms}"
+    return _req("POST", f"/debug_judge_note?offset_ms={offset_ms}&press={int(press)}{extra}")
 
 
 def judge_note_state() -> dict:
@@ -207,6 +208,21 @@ def lanemix_prompt() -> dict:
 def autolanemix(on: bool) -> dict:
     """자동 플레이 중 레인믹스 안내를 자동으로 수락할지(기본 켬)."""
     return _req("POST", f"/autolanemix/{'on' if on else 'off'}")
+
+
+def press_plan(plan: list) -> dict:
+    """시각을 정해 누르기 예약 — plan=[(입력 시각 ms, 물리 레인 0~15), ...]. 입력 시각 = 곡 위치 + 사용자 보정(게임이 입력을 읽는 식 그대로). 이전 예약·기록은 지워진다."""
+    return _req("POST", "/debug_press_plan?plan=" + ",".join(f"{ms:.2f}:{lane}" for ms, lane in plan))
+
+
+def judgment_log() -> dict:
+    """press_plan 이후 {presses: 실제로 누른 기록, judgments: 나온 모든 판정 [{grade,error_ms,lane,music_ms}], pending: 아직 안 누른 예약 수}."""
+    return _req("GET", "/debug_judgment_log")
+
+
+def autoplay_live(on: bool) -> dict:
+    """플레이 도중 자동 플레이를 켜고 끈다(autoplay() 는 곡 시작 때만 반영된다)."""
+    return _req("POST", f"/debug_autoplay_live?on={int(on)}")
 
 
 def play_state() -> dict:
