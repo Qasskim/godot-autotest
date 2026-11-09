@@ -9,15 +9,10 @@ from godot_runner import run_unit_module
 
 pytestmark = pytest.mark.no_server
 
-_RESULTS = run_unit_module("lanemix", allow_errors=("Modulo by zero",))   # 슈퍼랜덤 풀 1개 잠재 결함(KNOWN_ISSUES)에서 나는 예상된 오류
+_RESULTS = run_unit_module("lanemix")
 
 # 명세(DESIGN.md)와 코드가 다른데 어느 쪽이 맞는지 사용자 결정 전인 항목. 키: 케이스 이름 일부, 값: 사유.
-KNOWN_ISSUES: dict = {
-    "풀이 1개(8)뿐이어도":
-        "잠재 결함(사용자 결정 대기): LaneMixState._resolve_super_sequence가 풀이 1개일 때 \"직전 값과 다른 후보\"가 비어 "
-        "randi() % 0(0으로 나눔)으로 오류가 나고 0을 돌려준다. 시퀀서에는 random_pool 지정 UI가 없어(TASK_LIST_ARCHIVE: 수동 JSON만 가능) "
-        "채보를 손으로 고친 경우에만 닿는다.",
-}
+KNOWN_ISSUES: dict = {}      # 슈퍼랜덤 풀 1개 결함은 2026-11-10 수정(LaneMixState._resolve_super_sequence)으로 목록에서 뺐다
 
 
 @pytest.mark.parametrize("r", _RESULTS, ids=[r["name"] for r in _RESULTS])

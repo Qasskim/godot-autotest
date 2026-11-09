@@ -209,7 +209,7 @@ func _super_random() -> void:
 	check("슈퍼랜덤: 풀을 4·6으로 지정하면 둘 다 포함되고 번갈아 나옴", small_adj == 0 and small_miss == 0, "중복 %d / 누락 %d" % [small_adj, small_miss])
 	var one := _state([_sec(0.0, 1000.0, LaneMixState.SUPER_RANDOM_TARGET, [8])])
 	var one_val = one.resolve_target_mode(0)
-	eq("슈퍼랜덤 [탐색]: 풀이 1개(8)뿐이어도 오류 없이 그 값을 돌려줌", one_val, 8)
+	eq("슈퍼랜덤: 풀이 1개(8)뿐이어도 오류 없이 그 값을 돌려줌", one_val, 8)
 	eq("슈퍼랜덤: 소진 전 pop_super_step 조회가 없는 구간은 0", _state([_sec(0.0, 1000.0)]).pop_super_step(0), 0)
 
 
