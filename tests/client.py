@@ -199,6 +199,11 @@ def judge_note_state() -> dict:
     return _req("GET", "/debug_judge_note")
 
 
+def play_state() -> dict:
+    """플레이 중 점수 상태 {ex, max_ex, judged(지금까지 판정된 노트 수), target_accuracy(0~1, 목표 없으면 0), ghost_active}."""
+    return _req("GET", "/debug_play_state")
+
+
 def autoplay(on: bool) -> dict:
     return _req("POST", f"/autoplay/{'on' if on else 'off'}")
 
