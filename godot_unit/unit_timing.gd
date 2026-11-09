@@ -2,6 +2,7 @@ extends RefCounted
 # 모듈 3 — 박자와 타이밍 (기준: Godot/docs/DESIGN.md §8 "시퀀서 박자/스냅", §10 스크롤/타이밍)
 #   TimeSignature : 박자 값 객체 (meta.meter "3/4", "6/8")
 #   ChartTiming   : timing_events 기반 BPM·박자 테이블 (마디 길이 = 4 × 60000 / bpm × measure_length)
+#   TimingManager : 설정 화면 측정 평균 → 보정값 변환(calibration_from_taps, 부호를 뒤집어 저장 — 2026-11-10)
 # 기대값은 공식에서 손으로 계산한 ms 값을 직접 적었다(코드와 같은 식을 다시 계산해서 비교하지 않는다).
 
 const TOL := 1e-6
@@ -33,7 +34,19 @@ func run() -> Array:
 	_table_lookups()
 	_iter_measures()
 	_convenience()
+	_calibration()
 	return results
+
+
+# ── 보정 부호 (판정의 입력 시각 = 곡 위치 + 보정. 늦게 치는 유저는 늦은 만큼 빼야 하므로 측정 평균의 부호를 뒤집어 저장) ──
+func _calibration() -> void:
+	near("보정 측정: 박보다 100ms씩 늦게 친 유저 → 보정 −100", TimingManager.calibration_from_taps([100.0, 100.0, 100.0]), -100.0)
+	near("보정 측정: 40·60ms 늦게 친 유저 → 평균 50의 부호를 뒤집은 −50", TimingManager.calibration_from_taps([40.0, 60.0]), -50.0)
+	near("보정 측정: 박보다 일찍(−30·−50ms) 친 유저 → 보정 +40", TimingManager.calibration_from_taps([-30.0, -50.0]), 40.0)
+	near("보정 측정: 탭이 하나도 없으면 0", TimingManager.calibration_from_taps([]), 0.0)
+	# 효과: 늦게 치는 유저(노트 시각 + 100ms 에 누름)에게 측정값을 적용하면 입력 오차(곡 위치 + 보정 − 노트 시각)가 0 이 된다
+	var cal: float = TimingManager.calibration_from_taps([100.0, 100.0, 100.0])
+	near("보정 적용 효과: 100ms 늦게 치는 유저의 입력 오차가 0이 됨(전에는 +200)", (10000.0 + 100.0) + cal - 10000.0, 0.0)
 
 
 # ── 박자 (DESIGN §8: "3/4", "6/8", 숫자만 쓰면 n/4, 4/4 기본, 3/4 = 6/8 = 0.75) ──
