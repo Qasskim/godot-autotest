@@ -189,6 +189,16 @@ def tap(action: str) -> dict:
     return _req("POST", f"/tap/{action}")
 
 
+def judge_note(offset_ms: float, press: bool = True) -> dict:
+    """플레이 중 다음 단노트 하나를 골라 '노트 시각 + offset_ms' 에 그 레인을 터치한다(곡 시계 기준). press=False 면 안 치고 지나가게 둔다(Miss)."""
+    return _req("POST", f"/debug_judge_note?offset_ms={offset_ms}&press={int(press)}")
+
+
+def judge_note_state() -> dict:
+    """judge_note 의 진행 상태 {state: waiting|armed|done, grade, error_ms, lane, note_ms}."""
+    return _req("GET", "/debug_judge_note")
+
+
 def autoplay(on: bool) -> dict:
     return _req("POST", f"/autoplay/{'on' if on else 'off'}")
 
