@@ -49,7 +49,12 @@ def seeded():
     submit_pc(ACCT_B, mix(wow=total))
     login(ACCT_A)
     remove_all_rivals()
-    return {"b": account_row(ACCT_B)}
+    yield {"b": account_row(ACCT_B)}
+    # 뒤에 도는 test_server_screens 가 같은 곡에 같은 계정으로 기록을 올리므로, 내가 올린 기록은 치워 둔다(남아 있으면 '기록 갱신 없음'으로 응답이 달라진다)
+    login(ACCT_B)
+    client.clear_server_records()
+    login(ACCT_A)
+    client.clear_server_records()
 
 
 @pytest.fixture(autouse=True)
