@@ -6,7 +6,8 @@ from datetime import datetime
 import openpyxl
 from openpyxl.drawing.image import Image as XLImage
 
-EXCEL_PATH = os.path.join(os.path.dirname(__file__), "reports", "test_results.xlsx")
+# 풀 테스트(run_all.py)면 이번 실행의 결과 폴더(AUTOTEST_RUN_DIR), 아니면 reports (2026-11-11 사용자 지시)
+EXCEL_PATH = os.path.join(os.environ.get("AUTOTEST_RUN_DIR") or os.path.join(os.path.dirname(__file__), "reports"), "test_results.xlsx")
 
 
 def init_workbook():

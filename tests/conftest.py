@@ -9,7 +9,9 @@ SONG_ID    = "sample"
 DIFFICULTY = "normal"
 PLATFORM   = "android"
 
-REPORTS_DIR = os.path.join(os.path.dirname(__file__), "reports")
+# 풀 테스트(run_all.py)는 실행마다 결과 폴더(reports/yyyy_mm_dd_차수)를 만들어 AUTOTEST_RUN_DIR 로 넘긴다(2026-11-11 사용자 지시).
+# 시험 파일을 따로 돌릴 때는 폴더를 만들지 않고 reports 에 그대로 적는다.
+REPORTS_DIR = os.environ.get("AUTOTEST_RUN_DIR") or os.path.join(os.path.dirname(__file__), "reports")
 os.makedirs(REPORTS_DIR, exist_ok=True)
 
 _wb = None

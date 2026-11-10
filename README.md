@@ -90,7 +90,7 @@ python tests/run_all.py --cleanup           # server 단계 뒤 장부에 적힌
 ```
 
 - 단계: `unit`(마커 no_server 전부) · `integration`(게임 창 필요, `--no-server`) · `server`(개발 서버에 그대로 접속) · `full`(`test_full_scenario.py`, 마지막에 게임 종료).
-- **앞 단계가 실패해도 끝까지 돈다.** 끝에 단계별 합계 표가 나오고 `tests/reports/full_run_state.json`에 남는다. 엑셀(`test_results.xlsx`)에는 단계마다 시트가 쌓인다.
+- **앞 단계가 실패해도 끝까지 돈다.** 끝에 단계별 합계 표가 나오고 `tests/reports/full_run_state.json`에 남는다. 결과 파일은 실행마다 새로 생기는 결과 폴더에 모인다(아래 "테스트 결과").
 - 이어하기: `--resume`이면 통과한 단계는 건너뛴다. `full`은 곡마다 끝까지 통과하면 `tests/reports/full_scenario_progress.json`에 적어 두었다가 다음에 그 곡을 건너뛴다(건너뛴 곡은 엑셀에 N/A로 남는다). `--resume` 없이 돌리면 진행 기록을 비우고 처음부터 돈다.
 - 처음 한 번(2026-11-08): unit 단계 735개 중 733 통과·2 알려진 문제(xfail)·실패 0 (5분 32초).
 
@@ -98,7 +98,18 @@ python tests/run_all.py --cleanup           # server 단계 뒤 장부에 적힌
 
 ## 테스트 결과
 
-`tests/reports/test_results.xlsx`에 기록됩니다. 실행할 때마다 파일은 누적되고,
+**풀 테스트(`run_all.py`)** 는 실행할 때마다 `tests/reports/yyyy_mm_dd_차수` 폴더(차수는 그날 몇 번째 실행인지, 숫자만)를 새로 만들고 그 안에 결과를 모읍니다 (2026-11-11). 이어하기(`--resume`)는 이전 실행의 폴더를 그대로 씁니다.
+
+| 파일 | 내용 |
+|----|------|
+| `TC_결과.xlsx` | 사람이 읽는 테스트 케이스 형식. `요약` 시트(대분류별 PASS/FAIL/N/A)와 `TC` 시트(TC 번호·대분류·중분류·소분류·사전 조건·테스트 절차·순번·기대 결과·결과·비고·자동화 시험 이름). 풀 테스트가 끝나면 `tests/tc_export.py`가 자동으로 만든다. 케이스 문장은 `tests/tc_catalog/*.json`에 있고, 새 시험을 만들면 여기에 문장을 같이 써야 한다(없으면 뽑지 않고 빠진 시험 이름을 알려 준다) |
+| `test_results.xlsx` | 시험 이름 그대로의 결과(단계마다 시트) |
+| `FAIL_*.png` | 실패한 시험의 스크린샷(통과한 시험은 찍지 않는다) |
+| `run_log.txt` | 실행 로그 |
+| `full_run_state.json` | 단계별 통과/실패 요약 |
+| `full_run_<단계>.xml` | 단계별 pytest 결과 |
+
+**시험 파일을 따로 돌릴 때**(`pytest test_xxx.py`)는 폴더를 만들지 않고 `tests/reports/test_results.xlsx`에 기록됩니다. 실행할 때마다 파일은 누적되고,
 `일-월-년도` 이름의 새 시트가 추가됩니다 (같은 날 재실행 시 `(2)`, `(3)`... 붙음).
 
 | 열 | 내용 |

@@ -6,8 +6,7 @@ import pytest
 import client
 from conftest import SONG_ID, DIFFICULTY, PLATFORM, play_one_round
 
-REPORTS_DIR = os.path.join(os.path.dirname(__file__), "reports")
-os.makedirs(REPORTS_DIR, exist_ok=True)
+from conftest import REPORTS_DIR   # 풀 테스트면 이번 실행의 결과 폴더(reports/yyyy_mm_dd_차수), 아니면 reports
 
 
 def _screenshot(label: str) -> None:
