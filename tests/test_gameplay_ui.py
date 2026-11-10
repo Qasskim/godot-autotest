@@ -114,6 +114,10 @@ def test_combo_counts_up_and_judgment_word_shows_during_autoplay():
 def test_pause_overlay_texts_speed_offset_buttons_and_combo_stops():
     play_until_started()
     pause()
+    # 매 시험 전 보정 0 복원(conftest)은 이번 실행 메모리만 바꾸고 calibration.cfg 는 그대로라 파일에 옛 값(196 등)이 남는다.
+    # 슬라이더 값이 바뀌어야 저장되므로(같은 값이면 저장 안 됨) 한 번 움직였다가 0 으로 돌려 파일에도 0 을 쓴다(2026-11-10 풀 테스트에서 발견).
+    assert client.set_slider(0, 1.0)["ok"]
+    assert client.set_slider(0, 0.0)["ok"]
     got = labels()
     assert norm(ui("hud_speed") % saved_speed()) in got, f"배속 줄이 저장값 {saved_speed()} 와 다릅니다: {got}"
     assert offset_line(calibration_ms()) in got, f"오프셋 줄이 저장값 {calibration_ms()} 와 다릅니다: {got}"

@@ -3,6 +3,7 @@
 
 import base64
 import time
+import warnings
 import urllib.request
 import urllib.parse
 import json
@@ -150,18 +151,32 @@ def supabase_session(wait: float = 0.0) -> dict:
         time.sleep(0.5)
 
 
+LOGIN_TIMEOUT_RETRIES = 3  # 사용자 지정(2026-11-10 "3회"): 게임의 서버 요청 시간 초과(result=13) 때만 다시 시도하는 횟수
+
+
 def debug_login(account: int, timeout: float = 20.0) -> dict:
-    """고정 테스트 계정 N(debug_test_account{N}.local.json)으로 로그인한다. 성공하면 세션 상태를 돌려주고 실패하면 AssertionError."""
-    _req("POST", f"/supabase_debug_login?account={account}")
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        st = _req("GET", "/supabase_debug_login")
+    """고정 테스트 계정 N(debug_test_account{N}.local.json)으로 로그인한다. 성공하면 세션 상태를 돌려주고 실패하면 AssertionError.
+    서버 요청 시간 초과(result=13)면 LOGIN_TIMEOUT_RETRIES 번 다시 시도한다. 다 실패하면 실패로 남기고, 다시 시도해서 성공하면 경고로 횟수를 남긴다."""
+    retries = 0
+    while True:
+        _req("POST", f"/supabase_debug_login?account={account}")
+        deadline = time.time() + timeout
+        st = {}
+        while time.time() < deadline:
+            st = _req("GET", "/supabase_debug_login")
+            if st.get("status") in ("success", "error"):
+                break
+            time.sleep(0.5)
+        else:
+            raise AssertionError(f"테스트 계정 {account} 로그인이 {timeout}초 안에 끝나지 않았습니다")
         if st.get("status") == "success":
+            if retries:
+                warnings.warn(f"테스트 계정 {account} 로그인이 시간 초과(result=13)로 {retries}번 다시 시도한 뒤 성공했습니다 — 서버 응답이 느립니다")
             return supabase_session()
-        if st.get("status") == "error":
-            raise AssertionError(f"테스트 계정 {account} 로그인 실패: {st.get('result')}")
-        time.sleep(0.5)
-    raise AssertionError(f"테스트 계정 {account} 로그인이 {timeout}초 안에 끝나지 않았습니다")
+        if "result=13" in str(st.get("result")) and retries < LOGIN_TIMEOUT_RETRIES:
+            retries += 1
+            continue
+        raise AssertionError(f"테스트 계정 {account} 로그인 실패: {st.get('result')} (시간 초과 다시 시도 {retries}번)")
 
 
 def scene() -> str:
