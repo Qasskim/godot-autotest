@@ -163,14 +163,31 @@ python tests/run_all.py --cleanup           # server 단계 뒤 장부에 적힌
 | `test_server_social.py` | 서버 검증 5개 (`server`) — 라이벌 등록·해제·제한, 클라이언트 리더보드 조회(순위·닉네임), 고스트 시퀀스 접근 권한. 게임의 `LeaderboardService`를 `/debug_service`로 호출 |
 | `test_data_assets.py` | 데이터 검증 118개 (2026-11-10, 파일만 읽음) — 효과음 26종(코드의 `SFX_NAMES`와 파일·임포트가 일치, 형식·무음·길이), 메뉴 BGM 8종(60초 이하·루프), 도트 폰트 5종(임포트 설정 보존)·OFL 라이선스, 그림 PNG 전부(유효·임포트됨)·런처 아이콘 크기 |
 | `test_debug_ui_split.py` | 개발용/릴리스용 분리 3개 (2026-11-10) — 게임을 두 번 띄워 인자 없이는 DEBUG 버튼·F키 안내·FPS 글자가 보이고 `--hide-debug`에서는 숨겨지며 AUTO 표시는 남는지. 릴리스 APK에서의 `OS.is_debug_build()` 분기는 PC에서 못 봄 |
-| `test_unit_slide.py` | **모듈 (슬라이드)** 9개 — 슬라이드 장면·방향 값 저장·홀드형 아님. 방향은 판정에 안 쓰임(DESIGN §7과의 차이는 TASK_LIST #34-2) |
+| `test_unit_slide.py` | **모듈 (슬라이드)** 9개 — 슬라이드 장면·방향 값 저장·홀드형 아님. 방향은 판정에 안 쓰임 — 방향 판정은 쓸 예정이나 구현 보류(사용자 결정, DESIGN §7) |
 | `test_replay.py` | 리플레이 재생 1개 (2026-11-10) — 목표 B 자동 플레이 한 판 뒤 같은 판을 리플레이로 열어 점수·판정 개수·최대 콤보·등급이 같고 기록을 다시 저장하지 않는지. 시험이 찾은 결함(레인믹스 구간 시작 시각의 기본 노트에 기록이 하나 더 쓰여 밀림, TASK_LIST #34-1)을 같은 날 고침. 측정 도구 `probe_replay_miss.py` |
 | `test_song_preview.py` | 곡 미리듣기 1개 — 곡을 고르면 미리듣기 재생기가 켜져 위치가 앞으로 가고, 그동안 곡 선택 BGM이 줄어들고, 끝나면 하나로 돌아와 음량이 복귀하며 다시 재생되지 않음 |
 | `test_unit_upload_queue.py` | **모듈 14** 오프라인 업로드 큐 (2026-11-10) — 같은 곡·난이도·플랫폼은 높은 점수 하나만 남김, 다시 보낼 때 통신 실패만 큐에 남기고 영구 실패·성공은 뺌, `--no-server`에서 남음, 손상된 파일 |
 | `test_unit_package.py` | **모듈 15** 곡 패키지(.rgz) (2026-11-10) — 경로 조작 엔트리 거부 4종, song_uid 폴더·병합 규칙(manifest 유지·음원 스킵·같은 이름 다른 내용은 chart_uid 이름으로 보존), 진짜 공식 서명 잠금과 서명 없는 패키지 거부·격리, 변조 패키지 |
-| `test_server_functions.py` | 서버 엣지 함수 4개 (`server`, 2026-11-10) — 관리자가 아닌 계정이 `register_chart`·`sign_package`를 부르면 403 `not_admin`, `link_google_play`는 인증 코드가 비면 400 `missing_auth_code`, 디버그 엔드포인트의 함수 허용 목록. 서버에 쓰지 않는 호출만 |
-| `test_unit_palette.py` | **모듈 16** 비주얼 테마 3종 팔레트 (2026-11-10) — 테마 ID·경로·표시 이름, 키빔 모드 3종, 판정 이펙트 5등급 설정, 노트 색 흰/파랑 순서(4·5·6·8·16키), 마크 8종, 등급·게이지 색 조회, 불투명 색. **알려진 문제 3개(xfail)**: Wow·Great·Good 연출 종류가 겹침(DESIGN §11 표와 본문이 서로 다름, TASK_LIST #34-3) |
+| `test_server_functions.py` | 서버 함수 2개 (`server`, 2026-11-10) — 게임이 부르는 `link_google_play`는 인증 코드가 비면 400 `missing_auth_code`(구글에 닿기 전 거부), 디버그 엔드포인트의 함수 허용 목록(게임이 부르는 `submit_score`·`link_google_play`만). 서버에 쓰지 않는 호출만 |
+| `test_unit_palette.py` | **모듈 16** 비주얼 테마 3종 팔레트 (2026-11-10) — 테마 ID·경로·표시 이름, 키빔 모드 3종, 판정 이펙트 5등급 설정, 노트 색 흰/파랑 순서(4·5·6·8·16키), 마크 8종, 등급·게이지 색 조회, 불투명 색, 연출 규모가 Wow > Great > Good 순(길이·입자 수; 종류는 같아도 됨, DESIGN §11) |
 | `test_data_palette.py` | astral_ocean 파일에 직접 적힌 색 65개가 도트 팔레트 30색 안인지(DESIGN §13-3, 다른 두 테마는 대상 아님), 테마 파일 3개 형식 (3개, 파일만 읽음) |
+| `test_unit_fileutil.py` | **모듈 17** 원자적 파일 저장 (2026-11-10) — 새 파일·덮어쓰기·한글·20만 글자, 끝난 뒤 `.tmp` 없음, 임시파일을 못 열거나 폴더가 없을 때 오류 코드를 돌려주고 기존 파일 내용이 그대로 남음 |
+| `test_unit_audiobus.py` | **모듈 18** 오디오 버스 적용 — 버스 4개, 선형→dB, 음소거, 이퀄라이저 자동 프리앰프·켜고 끄기, 키음 재생 음량 |
+| `test_unit_ghost.py` | **모듈 19** 라이벌/전일 1위 고스트 진행 계산 — 누적 EX 표, 시점 조회 경계, 최대 EX, 중도 종료 기록, 빈 시퀀스 |
+| `test_unit_chartloader.py` | **모듈 20** 채보 불러오기 보조 — meta만 읽기가 전체 읽기와 채보 70개 전부에서 같음, 특이한 파일, 곡 폴더 자켓·풀믹스·미리듣기 찾기 17곡, manifest, 접근자 기본값 |
+| `test_unit_clock.py` | **모듈 21** 곡 시계와 보정 — 음수 시작·일시정지 고정·재개 이어가기·정지, 보정 ±200 자르기·저장·복원, 총 지연 |
+| `test_unit_settings.py` | **모듈 22** 게임 설정 — 볼륨 4종·음소거·이퀄라이저 자르기, 곡별 배속, 저장→다시 읽기 복원, S-RANDOM 읽을 때 없음, 잘못된 이퀄라이저 저장값 방어 |
+| `test_unit_keysound.py` | **모듈 23** 키음 불러오기 — sounds 전부 등록, 빈 항목·없는 파일 제외, 상대 경로, 확장자 폴백(.ogg→.wav), 스트림 읽기 |
+| `test_unit_authurl.py` | **모듈 24** 로그인 연동 보조 — 인증 주소 만들기(인코딩), "이미 연결됨" 오류 판별 |
+| `test_unit_popups.py` | **모듈 25** 공용 팝업 — ErrorPopup·ConfirmPopup·ProtoNoticePopup 글자·버튼·콜백·물리 뒤로가기·동의 저장 |
+| `test_unit_userservice.py` | **모듈 26** 유저 프로필·닉네임 — 표시폭(한글 2)·허용 글자·게스트 로컬 저장·프로필 복원·게스트 로그아웃/탈퇴 |
+| `test_error_popups.py` | 게임 시작 오류 팝업 3개 (2026-11-10, 전에는 "재현 어려우면 PASS") — 채보 파일 없음·깨진 채보·키음 없음 → 오류 팝업 → 확인 시 곡 선택 |
+| `test_orientation_flip.py` | 화면 뒤집힘 감지 → 자동 일시정지 4개 — 처음 값은 기준만, 애매한 값 무시, 부호 반전 시 정지, 정지 중 재반전은 쌓이지 않음 (`/debug_gravity`로 센서 값 주입) |
+| `test_low_spec_play.py` | 저사양 모드 재생 경로 — 켜고 풀믹스가 있는 곡을 치면 풀믹스 경로가 켜지고 끄면 꺼짐 |
+| `test_song_list_drag.py` | 곡 목록 끌어서 스크롤 5개 (2026-11-10) — 위로 끌면 목록이 내려가고 곡 선택은 안 바뀜, 아래로 끌면 올라가 맨 위에서 멈춤, 계속 끌면 목록 끝에서 멈춤, 목록 밖에서 시작한 끌기 무시, 임계값 아래 움직임은 탭 (`/debug_drag`·`/debug_scroll`) |
+| `test_na_user_areas.py` | **N/A 항목 25개 (비고 "유저 테스트 필요")** — 계정·외부 로그인 5(탈퇴 실행·Play Games·PC 구글 로그인·구글 연동 복구·라이벌 탈퇴 알림), 모양 9, 사용성 6, 폰 전용 5. 각 비고에 자동화로 확인되는 앞부분의 시험 이름도 적음. 결과 엑셀에 N/A 로 남음 |
+| `test_server_leaderboard_ext.py` | 서버 9개 (`server`, 2026-11-10) — 전일 1위 조회(순위·닉네임·점수·등급, 기록 없는 곡은 빈 값), 실패 기록 판별, 라이벌 기록 조회, 라이벌 알림 조회·삭제 호출, 계정 복구(로컬을 비우고 서버 기록 내려받기), 서버 시퀀스 리플레이(전일 1위·라이벌의 판정을 그대로 재생, 기록 저장 안 함) |
+| `COVERAGE.md` | **시험 범위 대조표** — 게임 스크립트 80개·데이터·서버 함수를 시험과 하나씩 대조(시험/화면/모양/폰·외부/안 씀/빈 곳). 점검 도구 `tests/coverage_audit.py` |
 
 ### 단위 테스트(헤드리스) 구조
 
@@ -179,7 +196,7 @@ godot_unit/run_unit.gd        # 실행기: --headless --script 로 unit_<모듈>
 godot_unit/unit_balance.gd    # 모듈 1 본체 (기대값은 DESIGN.md 수치를 직접 적음)
 godot_unit/unit_selfcheck.gd  # 자체 점검: 메모리의 수치를 잠깐 바꿔 테스트가 변경을 잡는지 확인(게임 파일은 안 건드림)
 godot_unit/unit_lanes.gd      # 모듈 2 본체 / unit_selfcheck_lanes.gd 는 모듈 2의 자체 점검
-godot_unit/unit_upload_queue.gd · unit_package.gd · unit_palette.gd · unit_slide.gd   # 모듈 14·15·16·슬라이드 본체 (2026-11-10)
+godot_unit/unit_upload_queue.gd · unit_package.gd · unit_palette.gd · unit_slide.gd · unit_fileutil.gd · unit_audiobus.gd · unit_ghost.gd · unit_chartloader.gd · unit_clock.gd · unit_settings.gd · unit_keysound.gd · unit_authurl.gd · unit_popups.gd · unit_userservice.gd   # 모듈 14~26·슬라이드 본체 (2026-11-10)
 godot_unit/unit_timing.gd     # 모듈 3 본체 / unit_lanemix.gd 는 모듈 4 본체 (모듈 3·4는 바꿀 수 있는 전역 수치가 없어 자체 점검 없음 — 기대값을 손계산으로 적음)
 tests/godot_runner.py         # Python 래퍼 (Godot 경로·게임 프로젝트·격리 APPDATA는 환경변수 GODOT_EXE / GAME_PROJECT / AUTOTEST_APPDATA 로 변경)
 tests/test_unit_balance.py    # 항목 하나 = pytest 케이스 하나, 기존 엑셀 리포트에 같이 기록
