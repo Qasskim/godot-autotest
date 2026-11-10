@@ -32,9 +32,9 @@ def post_json(path: str, body: dict, timeout=DEFAULT_TIMEOUT) -> dict:
         return json.loads(r.read().decode())
 
 
-def debug_submit_score(payload: dict, timeout: float = 30.0) -> dict:
+def debug_submit_score(payload: dict, timeout: float = 30.0, fn: str = "submit_score") -> dict:
     """submit_score 엣지 함수에 payload 를 그대로 보내고 {"ok": bool, "response": ...} 를 돌려준다 (TestServer /debug_submit_score)."""
-    post_json("/debug_submit_score", payload)
+    post_json("/debug_submit_score" + ("" if fn == "submit_score" else "?fn=" + fn), payload)
     deadline = time.time() + timeout
     while time.time() < deadline:
         st = _req("GET", "/debug_submit_score")
@@ -174,6 +174,16 @@ def game_state() -> dict:
 
 def result() -> dict:
     return _req("GET", "/result")
+
+
+def clear_local_records() -> dict:
+    """이 PC 프로필의 로컬 기록(최고 기록·시퀀스)을 전부 지운다 (TestServer /debug_clear_records, 서버 기록은 건드리지 않음)."""
+    return _req("POST", "/debug_clear_records")
+
+
+def replay_last() -> dict:
+    """결과 화면의 '리플레이 보기' 버튼과 같은 호출로 방금 판을 리플레이 모드로 다시 연다 (TestServer /debug_replay_last)."""
+    return _req("POST", "/debug_replay_last")
 
 
 def best(song_id: str, difficulty: str, platform: str = "android") -> dict:

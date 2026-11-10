@@ -24,7 +24,7 @@ GAME_APPDATA_DIR = os.path.join(REPO_ROOT, "tests", "reports", "_appdata_game")
 SERVER_APPDATA_DIR = os.path.join(REPO_ROOT, "tests", "reports", "_appdata_server")   # 서버 모드 전용 — 로그인 세션이 실행 사이에 남는다
 
 
-def start_game(timeout: int = 90, allow_server: bool = False, fresh_profile: bool = False) -> "subprocess.Popen":
+def start_game(timeout: int = 90, allow_server: bool = False, fresh_profile: bool = False, extra_args: tuple = ()) -> "subprocess.Popen":
     """게임을 PC에서 띄운다. **기본은 --no-server**(2026-11-07 사고: 그냥 띄우면 게임이 개발 서버에 익명 계정을 만든다 —
     SupabaseHTTP._ready → ensure_session). 사용자 폴더도 건드리지 않게 APPDATA를 격리 폴더로 바꿔 준다.
     TestServer(포트 5000)가 응답할 때까지 기다렸다가 프로세스를 돌려준다.
@@ -53,9 +53,11 @@ def start_game(timeout: int = 90, allow_server: bool = False, fresh_profile: boo
     env = dict(os.environ, APPDATA=appdata)
     cmd = [GODOT_EXE, "--path", GAME_PROJECT, "--windowed", "--resolution", "1920x864", "--position", "0,0"]
     if not allow_server:
-        cmd += ["--", "--no-server"]
+        cmd += ["--", "--no-server", *extra_args]      # extra_args: 게임 사용자 인자(예: --hide-debug)
     else:
         server_ledger.append("run_start", appdata=appdata)
+        if extra_args:
+            cmd += ["--", *extra_args]
     proc = subprocess.Popen(cmd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     deadline = time.time() + timeout
     while time.time() < deadline:
