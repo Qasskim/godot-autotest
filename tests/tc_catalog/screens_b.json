@@ -1,0 +1,150 @@
+{
+  "test_gameplay_ui.py": {
+    "big": "게임 플레이", "code": "Play", "pre": "SYNTHWAVE 4K EZ 를 자동 플레이로 시작한 상태",
+    "t": {
+      "test_start_countdown_shows_3_2_1_then_play_hud_with_auto_and_full_gauge": ["시작 카운트다운", "UI", "곡 선택에서 SYNTHWAVE 4K EZ 를 자동 플레이로 켠 상태", "PLAY 버튼 터치", ["카운트다운이 3 → 2 → 1 순서로 출력된다.", "카운트다운 숫자가 사라진다.", "AUTO 표시가 출력된다.", "게이지가 100% 로 시작한다.", "REPLAY 표시는 출력되지 않는다.", "화면의 버튼은 일시정지 아이콘 하나뿐이다."]],
+      "test_combo_counts_up_and_judgment_word_shows_during_autoplay": ["플레이 중 HUD", "UI", "", "3초 대기", ["콤보 숫자가 늘어난다.", "판정 글자(WOW·GREAT·GOOD 중 하나)가 출력된다.", "게이지가 100% 이다."]],
+      "test_pause_overlay_texts_speed_offset_buttons_and_combo_stops": ["일시정지 창", "UI", "", "일시정지 버튼 터치 후 2초 대기", ["PAUSED 글자가 출력된다.", "오프셋 값을 0 으로 맞춘다.", "배속 줄에 저장된 배속 값이 출력된다.", "오프셋 줄에 저장된 보정값이 출력된다.", "일시정지 중에는 콤보 숫자가 올라가지 않는다.", "배속 - · + 버튼, 재개 버튼, 곡 선택으로 버튼이 출력된다."]],
+      "test_pause_speed_buttons_step_quarter_save_and_clamp": ["일시정지 창", "배속 버튼", "일시정지 창이 출력된 상태", "배속 + 버튼 터치, - 버튼 터치, - 를 계속 터치, + 를 계속 터치", ["+ 를 누르면 배속이 0.25 오른다.", "오른 배속이 설정 파일에 저장된다.", "- 를 누르면 원래 값으로 돌아오고 저장된다.", "최소 배속이 0.25 이다.", "최대 배속이 10.0 이다.", "시험 뒤 원래 배속으로 돌아온다."]],
+      "test_pause_offset_slider_changes_label_and_saves_calibration_then_restores": ["일시정지 창", "오프셋 슬라이더", "일시정지 창이 출력된 상태", "오프셋 슬라이더를 +25, 최대, 최소로 옮긴 뒤 원래 값으로 되돌림", ["슬라이더가 +25 로 옮겨진다.", "오프셋 줄이 +25ms 로 바뀐다.", "보정값이 파일에 저장된다.", "오프셋 범위가 좌우 대칭이다.", "최소값도 파일에 저장된다.", "시험 뒤 원래 보정값으로 돌아온다."]],
+      "test_resume_shows_countdown_3_2_1_then_hides_overlay_and_combo_continues": ["재개", "동작", "일시정지 창이 출력된 상태", "재개 버튼 터치", ["재개 카운트다운이 3 → 2 → 1 순서로 출력된다.", "일시정지 창이 사라진다.", "콤보 숫자가 다시 올라간다."]],
+      "test_pause_during_resume_countdown_returns_to_pause_overlay": ["재개", "예외", "재개 카운트다운이 진행 중인 상태", "일시정지 버튼 다시 터치", ["카운트다운 숫자가 출력된다.", "일시정지 창으로 돌아온다.", "카운트다운 숫자가 사라진다."]],
+      "test_pause_icon_button_opens_overlay_and_back_key_toggles_pause": ["일시정지", "아이콘·뒤로가기 키", "", "일시정지 아이콘 터치, 뒤로가기 키, 카운트다운 뒤 뒤로가기 키", ["일시정지 아이콘이 눌린다.", "일시정지 창이 출력된다.", "일시정지 중 뒤로가기 키를 누르면 재개된다.", "재개 카운트다운이 끝난다.", "플레이 중 뒤로가기 키를 누르면 일시정지된다."]],
+      "test_quit_button_returns_to_song_select_with_same_song_selected": ["일시정지 창", "곡 선택으로", "일시정지 창이 출력된 상태", "곡 선택으로 버튼 터치", ["곡 선택 화면으로 이동한다.", "직전에 플레이한 곡(SYNTHWAVE)이 선택되어 있다."]]
+    }
+  },
+  "test_autoplay.py": {
+    "big": "게임 플레이", "code": "Play", "pre": "자동 플레이로 한 곡을 끝까지 플레이한 상태",
+    "t": {
+      "test_score_positive": ["자동 플레이 결과", "점수", "", "결과의 점수 확인", ["점수가 0보다 크다."]],
+      "test_accuracy_range": ["자동 플레이 결과", "달성률", "", "결과의 달성률 확인", ["달성률이 0~100 사이이다."]],
+      "test_grade_valid": ["자동 플레이 결과", "등급", "", "결과의 등급 확인", ["등급이 정해진 등급 이름 중 하나이다."]],
+      "test_clear_grade_valid": ["자동 플레이 결과", "클리어 종류", "", "결과의 클리어 종류 확인", ["클리어 종류가 정해진 이름 중 하나이다."]],
+      "test_autoplay_not_failed": ["자동 플레이 결과", "클리어 종류", "", "결과의 클리어 종류 확인", ["게임 오버가 아니다."]],
+      "test_judgment_sum_positive": ["자동 플레이 결과", "판정 개수", "", "결과의 판정 개수 합 확인", ["판정 개수의 합이 0보다 크다."]],
+      "test_max_combo_positive": ["자동 플레이 결과", "최대 콤보", "", "결과의 최대 콤보 확인", ["최대 콤보가 0보다 크다."]]
+    }
+  },
+  "test_marks.py": {
+    "big": "게임 플레이", "code": "Play", "pre": "자동 플레이로 한 곡을 끝까지 플레이한 상태",
+    "t": {
+      "test_marks_all_valid": ["마크", "데이터", "", "결과의 마크 목록 확인", ["모든 마크가 정해진 마크 이름이다."]],
+      "test_marks_has_clear_or_failed": ["마크", "데이터", "", "결과의 마크 목록 확인", ["clear 또는 failed 중 하나가 있다."]],
+      "test_clear_and_failed_not_both": ["마크", "데이터", "", "결과의 마크 목록 확인", ["clear 와 failed 가 함께 있지 않다."]],
+      "test_exclusive_marks_at_most_one": ["마크", "데이터", "", "결과의 마크 목록 확인", ["함께 나올 수 없는 마크는 하나만 있다."]],
+      "test_autoplay_gets_perfect": ["마크", "데이터", "", "결과의 마크 목록 확인", ["자동 플레이 결과에 perfect 마크가 있다."]]
+    }
+  },
+  "test_best_record.py": {
+    "big": "게임 플레이", "code": "Play", "pre": "곡 선택 화면에 진입한 상태",
+    "t": {
+      "test_is_best_flag_and_best_endpoint": ["최고 기록", "저장", "", "자동 플레이로 한 판 플레이 후 최고 기록 조회", ["최고 기록 조회가 오류 없이 된다.", "최고 기록이면 저장된 점수가 이번 점수와 같다.", "최고 기록이 아니면 이전 최고 기록이 있다.", "이전 최고 기록 점수가 이번 점수 이상이다."]],
+      "test_two_plays_comparison": ["최고 기록", "비교", "", "자동 플레이로 2판 연속 플레이 후 두 점수 비교", ["점수가 올랐으면 최고 기록으로 표시된다.", "동점이면 최고 기록으로 표시되지 않는다.", "점수가 낮으면 최고 기록으로 표시되지 않는다.", "이전 최고 기록 점수가 이번 점수보다 높다."]]
+    }
+  },
+  "test_autoplay_target_grade.py": {
+    "big": "게임 플레이", "code": "Play", "pre": "곡 선택 화면에서 무작위로 고른 곡",
+    "t": {
+      "test_target_grade_autoplay_hits_every_note_without_breaking_combo": ["목표 등급 자동 플레이", "동작", "", "목표 등급 {p} 로 자동 플레이를 켜고 곡을 끝까지 플레이", ["곡 선택 화면이 출력된다.", "곡 목록이 출력된다.", "Miss 와 Oops 가 0개이다.", "콤보가 끊기지 않는다(최대 콤보가 친 노트 수 이상).", "결과 등급이 목표 등급 {p} 와 같다.", "곡이 끝나면 결과 화면이 출력된다."]]
+    }
+  },
+  "test_judgment_display.py": {
+    "big": "게임 플레이", "code": "Play", "pre": "무작위로 고른 곡을 자동 플레이 없이 시작한 상태",
+    "t": {
+      "test_each_judgment_word_appears_on_screen_after_matching_input": ["판정 글자", "UI", "", "노트 시각에서 0·36·80·180ms 어긋나게 터치하고, 노트 하나는 치지 않고 지나가게 둠", ["WOW 글자가 출력된다.", "GREAT 글자가 출력된다.", "GOOD 글자가 출력된다.", "OOPS 글자가 출력된다.", "치지 않은 노트는 MISS 글자가 출력된다."]]
+    }
+  },
+  "test_miss_calibration.py": {
+    "big": "게임 플레이", "code": "Play", "pre": "곡 목록의 첫 곡을 자동 플레이 없이 시작한 상태",
+    "t": {
+      "test_miss_uses_same_calibration_as_judgment": ["Miss 확정", "보정", "", "보정을 -100, 0, +100 으로 바꿔 가며 노트 시각보다 늦게(+60~+300ms) 터치", ["입력 시각(곡 위치 + 보정)이 Oops 창(250ms) 안이면 판정이 나오고, 넘으면 Miss 가 된다."]]
+    }
+  },
+  "test_lanemix_prompt.py": {
+    "big": "레인믹스", "code": "Mix", "pre": "레인믹스 구간이 있는 4K EZ 곡을 무작위로 골라 자동 플레이(자동 수락 끔)로 시작한 상태",
+    "t": {
+      "test_accepting_offer_counts_down_switches_key_mode_and_returns": ["안내 수락", "동작", "", "구간 전에 뜨는 TAP 버튼 터치 후 구간이 끝날 때까지 대기", ["안내가 뜬 순간 키 수는 시작 키 수이다.", "전환 목표 키 수가 시작 키 수와 다르다.", "수락하면 목표 키 수가 그대로 유지된다.", "시작 카운트다운이 3 → 2 → 1 이다.", "카운트다운이 끝나면 키 수가 목표 키 수로 바뀐다.", "구간이 끝나기 전에는 목표 키 수를 유지한다.", "원복 카운트다운이 3 → 2 → 1 이다.", "원복 뒤 키 수가 시작 키 수로 돌아온다."]],
+      "test_ignoring_offer_keeps_base_key_mode_and_hides_prompt": ["안내 무시", "동작", "", "TAP 버튼을 누르지 않고 대기", ["안내가 사라진다.", "키 수가 바뀌지 않고 카운트다운도 뜨지 않는다."]]
+    }
+  },
+  "test_lanemix_boundary.py": {
+    "big": "레인믹스", "code": "Mix", "pre": "레인믹스 구간을 수락한 상태",
+    "t": {
+      "test_start_edge_ez_no_input_lost": ["구간 시작 경계", "입력", "4K EZ (곡-보정-입력 오차: {p})", "구간 시작 시각부터 250ms 안의 레인믹스 노트를 같은 오차로 터치", ["누른 노트가 모두 판정된다(판정 없이 사라지는 입력이 없다)."]],
+      "test_start_edge_6k_ex_no_input_lost": ["구간 시작 경계", "입력", "{p} 6K EX, 보정 143", "구간 시작 시각부터 250ms 안의 레인믹스 노트를 여러 오차로 터치", ["누른 노트가 모두 판정된다(판정 없이 사라지는 입력이 없다)."]],
+      "test_end_edge_no_input_lost": ["구간 끝 경계", "입력", "ROCK 4K EZ, 보정 143", "구간 끝 시각 근처의 노트를 여러 오차로 터치", ["누른 노트가 모두 판정된다(판정 없이 사라지는 입력이 없다)."]]
+    }
+  },
+  "test_lanemix_end_layout.py": {
+    "big": "레인믹스", "code": "Mix", "pre": "레인믹스 구간을 수락한 상태",
+    "t": {
+      "test_notes_after_section_end_keep_base_layout": ["구간 끝 직후", "노트 배치", "", "구간이 끝나기 전부터 끝난 뒤까지 노트 배치 관찰", ["구간의 채보를 찾는다.", "구간 키 수가 기본 키 수와 다르다.", "구간 끝 이후의 노트가 화면에 나타난다.", "구간 끝 이후의 기본 노트가 처음부터 기본 키 수 배치로 그려진다."]]
+    }
+  },
+  "test_low_spec_play.py": {
+    "big": "게임 플레이", "code": "Play", "pre": "곡 선택 화면에 진입한 상태",
+    "t": {
+      "test_low_spec_on_uses_full_mix_and_off_does_not": ["저사양 모드", "재생 경로", "", "저사양 모드를 끄고 SYNTHWAVE 플레이, 켜고 다시 플레이", ["저사양 모드가 꺼진 값으로 저장되어 있다.", "꺼져 있으면 풀믹스 재생을 쓰지 않는다.", "저사양 모드를 켜면 설정이 저장된다.", "켜져 있으면 풀믹스 재생을 쓴다."]]
+    }
+  },
+  "test_orientation_flip.py": {
+    "big": "게임 플레이", "code": "Play", "pre": "곡을 플레이 중인 상태(센서 값을 시험 도구로 넣음)",
+    "t": {
+      "test_first_reading_only_sets_the_reference_and_same_sign_does_nothing": ["화면 뒤집힘 감지", "기준값", "", "센서 값을 처음 넣고, 같은 부호 값을 다시 넣음", ["처음 읽은 값에서는 일시정지되지 않는다.", "같은 부호가 이어지면 일시정지되지 않는다."]],
+      "test_small_readings_during_a_turn_are_ignored": ["화면 뒤집힘 감지", "애매한 값", "", "절대값 5 미만의 센서 값을 넣고 같은 부호로 돌아옴", ["애매한 값에서는 일시정지되지 않는다.", "같은 부호로 돌아오면 일시정지되지 않는다."]],
+      "test_sign_flip_pauses_the_game": ["화면 뒤집힘 감지", "뒤집힘", "", "부호가 반대인 센서 값을 넣음", ["자동으로 일시정지된다.", "일시정지 창이 출력된다."]],
+      "test_another_flip_while_paused_does_not_stack_or_resume": ["화면 뒤집힘 감지", "일시정지 중", "뒤집혀서 일시정지된 상태", "다시 부호가 반대인 센서 값을 넣음", ["일시정지 상태가 유지된다.", "재개되거나 카운트다운이 시작되지 않는다.", "일시정지 창이 그대로 출력된다."]]
+    }
+  },
+  "test_error_popups.py": {
+    "big": "게임 플레이", "code": "Play", "pre": "곡 선택 화면에 진입한 상태",
+    "t": {
+      "test_missing_chart_file_shows_error_popup_and_ok_returns_to_song_select": ["오류 팝업", "채보 없음", "", "파일이 없는 채보로 플레이 시작 후 확인 버튼 터치", ["채보를 불러올 수 없다는 팝업이 출력된다.", "확인 버튼이 출력된다.", "확인을 누르면 곡 선택 화면으로 돌아온다."]],
+      "test_unreadable_chart_file_shows_the_same_error_popup": ["오류 팝업", "채보 깨짐", "", "내용이 깨진 채보로 플레이 시작 후 확인 버튼 터치", ["채보를 불러올 수 없다는 팝업이 출력된다.", "확인을 누르면 곡 선택 화면으로 돌아온다."]],
+      "test_note_with_unknown_key_sound_shows_music_error_popup_and_ok_returns": ["오류 팝업", "키음 없음", "", "노트의 키음 이름이 소리 목록에 없는 채보로 플레이 시작 후 확인 버튼 터치", ["음악 파일을 찾을 수 없다는 팝업이 출력된다.", "확인을 누르면 곡 선택 화면으로 돌아온다."]]
+    }
+  },
+  "test_target_grade_hud.py": {
+    "big": "게임 플레이", "code": "Play", "pre": "곡 선택에서 목표 등급 {p}, 고스트 없음으로 설정한 상태",
+    "t": {
+      "test_target_line_shows_name_me_and_difference_by_rule": ["목표 등급 표시", "UI", "", "무작위 곡을 시작해 노트 하나를 WOW 로 치고 일시정지", ["곡 선택 화면이 출력된다.", "곡 목록이 출력된다.", "목표 등급 {p} 이(가) 선택된다.", "게임 플레이 화면이 출력된다.", "시작 카운트다운이 끝난다.", "친 노트가 WOW 로 판정된다.", "일시정지 창이 출력된다.", "게임이 쓰는 목표 정확도가 등급 커트라인과 같다.", "고스트가 꺼져 있다.", "목표 등급 이름 {p} 이(가) 화면에 출력된다.", "'ME' 글자가 출력된다.", "점수 차이가 규칙(내 점수 − 커트라인 × 노트당 만점 × 판정된 노트 수)대로 출력된다.", "BEST·RIVAL 글자는 출력되지 않는다."]]
+    }
+  },
+  "test_replay.py": {
+    "big": "리플레이", "code": "Replay", "pre": "목표 등급 B 자동 플레이로 SYNTHWAVE 4K EZ 를 끝까지 플레이해 기록을 남긴 상태",
+    "t": {
+      "test_replay_reproduces_the_recorded_judgments_and_does_not_save_again": ["리플레이 재생", "동작", "", "방금 플레이한 판을 리플레이로 열어 끝까지 재생", ["처음 판에 Wow 와 Great·Good 이 섞여 있다.", "리플레이가 시작된다.", "REPLAY 표시가 출력된다.", "끝나면 결과 화면이 출력된다.", "점수·판정 개수·최대 콤보·등급이 처음 판과 같다.", "리플레이는 기록을 다시 저장하지 않는다."]]
+    }
+  },
+  "test_result_screen.py": {
+    "big": "결과 화면", "code": "Result", "pre": "SYNTHWAVE 4K EZ 를 자동 플레이로 끝까지 플레이해 결과 화면이 출력된 상태",
+    "t": {
+      "test_result_numbers_on_screen_match_the_games_own_result": ["결과 숫자", "UI", "", "결과 화면의 숫자 확인", ["EX SCORE 줄이 게임이 계산한 점수/만점과 같다.", "EX RATE 줄이 달성률과 같다.", "최대 콤보 줄이 같다.", "클리어 종류 줄이 같다.", "끊긴 횟수 0, FAST/SLOW 0/0 으로 출력된다.", "판정별 개수가 게임이 계산한 값과 같다."]],
+      "test_result_header_shows_mode_title_artist_bpm": ["곡 정보", "UI", "", "결과 화면의 위쪽 곡 정보 확인", ["프리모드 표시가 출력된다.", "곡 이름과 난이도 [EZ] 가 출력된다.", "아티스트(VAi)와 BPM 115.0 이 출력된다."]],
+      "test_result_shows_my_rank_row_and_grade_axis_and_no_rival_message": ["순위·등급 그래프", "UI", "", "결과 화면의 순위 줄과 등급 그래프 확인", ["내 순위 줄이 출력된다.", "라이벌 기록이 없다는 안내 문구가 출력된다.", "그래프에 내 등급이 출력된다.", "등급 그래프 축의 등급 이름이 모두 출력된다."]],
+      "test_result_buttons_retry_and_song_select_only_without_replay": ["버튼", "UI", "", "결과 화면의 버튼 확인", ["다시 하기·곡 선택 버튼이 출력된다.", "리플레이 보기 버튼은 출력되지 않는다."]],
+      "test_result_images_show_grade_and_mark_pictures": ["등급·마크 그림", "UI", "", "결과 화면의 그림 확인", ["받은 등급의 그림이 출력된다.", "받은 마크의 그림이 출력된다."]],
+      "test_each_grade_shows_its_own_grade_picture": ["등급·마크 그림", "등급별", "등급 {p} 인 결과로 결과 화면을 연 상태", "결과 화면의 등급 그림 확인", ["결과 화면이 출력된다.", "{p} 등급 그림이 출력된다.", "다른 등급의 그림은 출력되지 않는다."]],
+      "test_each_mark_shows_its_own_mark_picture": ["등급·마크 그림", "마크별", "마크 {p} 만 있는 결과로 결과 화면을 연 상태", "결과 화면의 마크 그림 확인", ["결과 화면이 출력된다.", "{p} 마크 그림이 출력된다.", "다른 마크의 그림은 출력되지 않는다."]],
+      "test_retry_button_starts_the_same_song_again": ["버튼", "다시 하기", "", "다시 하기 버튼 터치", ["결과 화면이 출력된다.", "같은 곡의 게임 플레이 화면으로 이동한다."]],
+      "test_song_select_button_returns_to_song_select": ["버튼", "곡 선택", "", "곡 선택 버튼 터치", ["결과 화면이 출력된다.", "곡 선택 화면으로 이동한다."]]
+    }
+  },
+  "test_debug_ui_split.py": {
+    "big": "개발용/릴리스용 화면 분리", "code": "Debug", "pre": "게임을 실행 인자를 바꿔 따로 띄움",
+    "t": {
+      "test_without_the_switch_dev_ui_is_shown": ["개발용 화면", "UI", "숨김 인자 없이 게임 실행", "곡 선택 화면과 플레이 화면 확인", ["DEBUG 버튼이 출력된다.", "F키 안내 글자가 출력된다.", "FPS 글자가 출력된다."]],
+      "test_hide_debug_hides_debug_button_f_key_hint_and_fps": ["릴리스용 화면", "UI", "숨김 인자(--hide-debug)를 주고 게임 실행", "곡 선택 화면과 플레이 화면 확인", ["DEBUG 버튼이 출력되지 않는다.", "F키 안내 글자가 출력되지 않는다.", "FPS 글자가 출력되지 않는다."]],
+      "test_hide_debug_keeps_the_auto_badge": ["릴리스용 화면", "UI", "숨김 인자(--hide-debug)를 주고 게임 실행", "자동 플레이로 플레이 화면 확인", ["자동 플레이 표시(AUTO)는 그대로 출력된다."]]
+    }
+  },
+  "test_no_server.py": {
+    "big": "서버 접속 차단", "code": "Offline", "pre": "서버 접속 차단 인자(--no-server)로 게임 실행",
+    "t": {
+      "test_game_runs_with_test_server": ["실행", "동작", "", "게임에 연결 확인 요청", ["게임이 응답한다."]],
+      "test_no_session_file_created": ["세션", "데이터", "", "사용자 폴더의 로그인 세션 파일 확인", ["익명 로그인 세션 파일이 만들어지지 않는다."]],
+      "test_server_calls_are_blocked": ["서버 호출", "동작", "", "테스트 계정 로그인 요청", ["서버 호출이 차단되고 차단 사유가 돌아온다."]],
+      "test_no_external_tcp_connections": ["네트워크", "동작", "", "게임 프로세스의 외부 연결 수 확인", ["외부로 나가는 연결이 0개이다."]]
+    }
+  }
+}

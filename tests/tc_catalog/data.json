@@ -1,0 +1,170 @@
+{
+  "test_full_scenario.py": {
+    "big": "전체 시나리오", "code": "Scn", "pre": "게임이 실행된 상태(앞 항목에서 이어지는 한 번의 흐름)",
+    "t": {
+      "test_00_ping": ["시작", "연결", "", "게임에 연결 확인 요청", ["게임이 응답한다."]],
+      "test_00_mainmenu_entry": ["메인 메뉴", "진입", "", "메인 메뉴로 이동", ["메인 메뉴 화면이 출력된다."]],
+      "test_01_mainmenu_back_once_shows_exit_warning": ["메인 메뉴", "뒤로가기", "메인 메뉴 화면이 출력된 상태", "뒤로가기 1회", ["메인 메뉴 화면에 그대로 있고 게임이 종료되지 않는다."]],
+      "test_01_mainmenu_settings_button": ["메인 메뉴", "설정 버튼", "메인 메뉴 화면이 출력된 상태", "설정 버튼 터치", ["설정 화면으로 이동한다."]],
+      "test_02_settings_song_dir_na": null,
+      "test_02_settings_calibration_popup_flow": ["설정", "보정 측정 팝업", "설정 화면이 출력된 상태", "보정 측정 팝업을 열어 8회 터치, 다시 하기 버튼 터치, 8회 터치 후 적용 버튼 터치", ["팝업이 열리고 터치·다시 하기·적용이 오류 없이 처리된다."]],
+      "test_02_settings_calibration_popup_close_button": ["설정", "보정 측정 팝업", "설정 화면이 출력된 상태", "보정 측정 팝업을 열고 닫기 버튼 터치", ["팝업이 오류 없이 닫힌다."]],
+      "test_02_settings_back_button": ["설정", "돌아가기", "설정 화면이 출력된 상태", "돌아가기 버튼 터치", ["메인 메뉴 화면으로 이동한다."]],
+      "test_03_mainmenu_play_button": ["메인 메뉴", "프리모드", "메인 메뉴 화면이 출력된 상태", "프리모드 타일 터치", ["곡 선택 화면으로 이동한다."]],
+      "test_03_songselect_tab_world": ["곡 선택", "Best Score 탭", "곡 선택 화면이 출력된 상태", "Best Score 탭 터치", ["탭이 오류 없이 선택된다."]],
+      "test_03_songselect_tab_my": ["곡 선택", "내 기록 탭", "곡 선택 화면이 출력된 상태", "내 기록 탭 터치", ["탭이 오류 없이 선택된다."]],
+      "test_03_songselect_tab_rival": ["곡 선택", "라이벌 탭", "곡 선택 화면이 출력된 상태", "라이벌 탭 터치", ["탭이 오류 없이 선택된다."]],
+      "test_03_songselect_debug_popup_open_close": ["곡 선택", "DEBUG 팝업", "곡 선택 화면이 출력된 상태", "DEBUG 팝업을 열고 닫기", ["팝업이 오류 없이 열리고 닫힌다."]],
+      "test_04_song_list_not_empty": ["곡 선택", "곡 목록", "곡 선택 화면이 출력된 상태", "곡 목록 조회", ["곡 목록에 곡이 1개 이상 있다."]],
+      "test_04_play_every_chart": ["곡 전체 순회", "완료", "곡 선택 화면이 출력된 상태", "곡 목록의 모든 곡을 자동 플레이로 차례로 플레이(곡별 결과는 아래 곡별 항목)", ["순회할 곡이 1개 이상 있고 순회가 끝까지 진행된다."]],
+      "test_05_songselect_back_button": ["곡 선택", "돌아가기", "곡 선택 화면이 출력된 상태", "돌아가기 버튼 터치", ["메인 메뉴 화면으로 이동한다."]],
+      "test_05_mainmenu_quit_normal_exit": null
+    }
+  },
+  "_full_direct": {
+    "big": "전체 시나리오", "code": "Scn",
+    "chart_steps": {
+      "GameScene 진입": ["플레이 시작", "곡 선택에서 그 곡을 선택한 상태", "자동 플레이를 켜고 PLAY 버튼 터치", "게임 플레이 화면으로 이동한다."],
+      "포즈 오버레이(배속/캘리브레이션 슬라이더)": ["일시정지 창", "시작 카운트다운이 끝난 상태", "일시정지 후 배속 +/- 버튼을 임의 횟수 터치, 오프셋 슬라이더를 임의 값으로 옮김", "오류 없이 처리된다."],
+      "터치존 오버레이 on/off": ["터치 구역 표시", "일시정지 창이 출력된 상태", "터치 구역 표시를 켰다가 끔", "오류 없이 처리된다."],
+      "포즈 나가기 → SongSelect": ["일시정지 창", "일시정지 창이 출력된 상태", "곡 선택으로 버튼 터치", "곡 선택 화면으로 이동한다."],
+      "완주 → ResultScreen 진입": ["완주", "일시정지를 풀고 플레이 중인 상태", "곡이 끝날 때까지 대기", "곡이 끝나면 결과 화면이 출력된다."],
+      "결과값(score/grade) 정합성": ["결과", "결과 화면이 출력된 상태", "결과 값 조회", "결과에 점수와 등급이 들어 있다."],
+      "곡선택으로 복귀": ["결과", "결과 화면이 출력된 상태", "곡 선택 버튼 터치", "곡 선택 화면으로 이동한다."],
+      "이전 실행에서 통과해 건너뜀": ["건너뜀", "", "이어하기로 실행", "같은 채보로 통과한 기록이 있어 건너뛴다."]
+    },
+    "other": {
+      "Settings: 곡 폴더 선택 (FileDialog / Android 오버레이)": ["설정", "곡 폴더 선택", "설정 화면이 출력된 상태", "곡 폴더 선택 버튼 터치", "곡 폴더를 고르는 창이 출력된다."],
+      "GameScene: 채보 로드 실패 팝업": ["오류 팝업", "채보 로드 실패", "", "(이 시나리오는 정상 곡만 순회)", "채보를 불러올 수 없다는 팝업이 출력된다."],
+      "GameScene: 음악 파일 누락 팝업": ["오류 팝업", "음악 파일 누락", "", "(이 시나리오는 정상 곡만 순회)", "음악 파일을 찾을 수 없다는 팝업이 출력된다."],
+      "ResultScreen: 기록 저장 실패 팝업": ["오류 팝업", "기록 저장 실패", "", "(이 시나리오는 정상 저장만 거침)", "기록 저장 실패 팝업이 출력된다."],
+      "MainMenu: 뒤로가기 2번 → 정상 종료": ["메인 메뉴", "종료", "메인 메뉴 화면이 출력된 상태", "뒤로가기 2회(3초 안)", "게임이 정상 종료된다."]
+    }
+  },
+  "_na": {"big": "유저 테스트(자동화 제외)", "code": "NA"},
+  "test_cross_formula.py": {
+    "big": "소리 공식(시퀀서와 게임 비교)", "code": "Sound", "pre": "시퀀서와 게임의 음량·좌우(pan) 계산 결과표를 각각 뽑은 상태",
+    "t": {
+      "test_csharp_pan_follows_documented_formula": ["좌우(pan)", "시퀀서", "", "시퀀서의 pan 결과 255개를 문서 공식과 비교", ["결과가 255개이다.", "pan 0 은 원음, 양수는 왼쪽만·음수는 오른쪽만 공식대로 줄어든다."]],
+      "test_csharp_gain_follows_documented_formula": ["음량", "시퀀서", "", "시퀀서의 음량 결과 40개를 문서 공식과 비교", ["음량이 velocity/64 × volume/100 과 같다."]],
+      "test_game_pan_matches_sequencer": ["좌우(pan)", "게임", "", "게임의 pan 적용 결과 255개를 시퀀서 결과와 비교", ["결과가 255개이다.", "반대쪽 채널 값이 시퀀서와 1 이내로 같고 가까운 쪽은 그대로이다."]],
+      "test_game_gain_matches_sequencer": ["음량", "게임", "", "게임의 음량 결과 40개를 시퀀서 결과와 비교", ["40개 조합이 모두 같다."]],
+      "test_out_of_range_values_are_clamped_the_same_way": ["범위 밖 값", "비교", "", "범위를 벗어난 velocity·volume·pan 값을 양쪽에 넣어 비교", ["velocity -5 가 같은 값으로 잘린다.", "velocity 0 이 같은 값으로 잘린다.", "velocity 500 이 같은 값으로 잘린다.", "volume -10 이 같은 값으로 잘린다.", "volume 300 이 같은 값으로 잘린다.", "pan -200·200 이 같은 값으로 잘린다."]],
+      "test_sequencer_does_not_write_default_values": ["기본값 저장", "시퀀서", "", "기준값(velocity 64, volume 100, pan 0)인 노트를 저장", ["기준값은 파일에 적지 않는다."]]
+    }
+  },
+  "test_data_assets.py": {
+    "big": "데이터: 소리·폰트·그림 파일", "code": "Asset", "pre": "게임 프로젝트의 파일을 읽기 전용으로 확인",
+    "t": {
+      "test_sfx_names_in_code_have_no_duplicates": ["효과음", "이름 목록", "", "코드의 효과음 이름 목록 확인", ["이름이 겹치지 않는다.", "이름이 1개 이상 있다."]],
+      "test_sfx_file_exists_is_readable_not_silent_and_short": ["효과음", "파일", "", "효과음 '{p}' 파일 확인", ["파일이 있다.", "임포트 파일이 있다.", "WAV 형식(1~2채널, 16비트)으로 읽힌다.", "길이가 0초보다 길고 10초 이하이다.", "완전한 무음이 아니다."]],
+      "test_no_sfx_file_without_a_name_in_code": ["효과음", "파일", "", "효과음 폴더의 파일과 코드의 이름 목록 비교", ["코드에 없는 효과음 파일이 없다."]],
+      "test_bgm_file_is_ogg_within_60_seconds_and_loops": ["메뉴 BGM", "파일", "", "BGM '{p}' 파일 확인", ["파일이 있다.", "1~2채널이다.", "길이가 60초 이하이다.", "임포트 설정이 반복 재생이다."]],
+      "test_no_bgm_file_outside_the_documented_eight": ["메뉴 BGM", "파일", "", "BGM 폴더의 파일과 설계 문서의 8곡 비교", ["설계 문서의 8곡과 같다."]],
+      "test_pixel_font_exists_and_import_keeps_dots_sharp": ["도트 폰트", "파일", "", "폰트 '{p}' 파일과 임포트 설정 확인", ["파일이 있고 비어 있지 않다.", "글꼴 파일 형식이다.", "도트가 번지지 않는 임포트 설정이다."]],
+      "test_font_license_text_is_kept": ["도트 폰트", "라이선스", "", "폰트 폴더의 라이선스 파일 확인", ["OFL 라이선스 파일이 있다."]],
+      "test_every_asset_png_is_valid_and_imported": ["그림", "파일", "", "그림 '{p}' 파일 확인", ["가로·세로 크기가 0보다 크다.", "임포트 파일이 있다."]],
+      "test_launcher_icons_have_the_sizes_in_their_names": ["그림", "앱 아이콘", "", "앱 아이콘 파일의 크기 확인", ["아이콘 크기가 파일 이름의 숫자와 같다."]]
+    }
+  },
+  "test_data_charts.py": {
+    "big": "데이터: 채보·곡 폴더", "code": "Chart", "pre": "게임 프로젝트의 수록곡·튜토리얼 채보 파일을 읽기 전용으로 확인",
+    "t": {
+      "test_song_and_chart_counts": ["수록곡 수", "데이터", "", "곡 폴더와 채보 파일 수 세기", ["곡 폴더가 17개이다.", "수록 채보가 68개(곡마다 EZ·NM·HD·EX)이다."]],
+      "test_display_titles_match_design_list": ["표시 제목", "데이터", "", "수록곡의 표시 제목을 설계 문서 목록과 비교", ["설계 문서 목록에 없는 표시 제목이 없다.", "표시 제목이 17종이다."]],
+      "test_design_title_list_equals_shipped_titles": ["표시 제목", "데이터", "", "설계 문서 목록과 수록곡 표시 제목 비교", ["두 목록이 같다."]],
+      "test_all_chart_files_parse_with_required_sections": ["채보 형식", "데이터", "", "모든 채보 파일 읽기", ["모든 채보가 읽히고 필수 항목(meta·sounds·timing_events·gimmick_events·score)이 있다."]],
+      "test_meta_required_fields_and_types": ["채보 형식", "곡 정보", "", "모든 채보의 곡 정보 항목 확인", ["필수 항목이 있고 값의 종류가 맞다."]],
+      "test_display_title_on_shipped_charts": ["표시 제목", "데이터", "", "수록 채보의 표시 제목 확인", ["수록 채보마다 표시 제목이 있다."]],
+      "test_difficulty_and_keymode_match_file_and_design": ["난이도·키 수", "데이터", "", "채보의 난이도와 키 수 확인", ["난이도가 파일 이름과 같고 키 수가 EZ 4 / NM 5 / HD 6 / EX 6 이다."]],
+      "test_charts_in_a_song_share_metadata": ["곡 정보", "데이터", "", "같은 곡의 네 난이도 채보 비교", ["제목·표시 제목·아티스트·BPM 이 같다."]],
+      "test_sounds_unique_names_and_files_exist": ["키음", "데이터", "", "채보의 소리 목록 확인", ["이름이 겹치지 않고 파일이 실제로 있다."]],
+      "test_keysound_wav_files_have_wav_header": ["키음", "파일", "", "채보가 쓰는 키음 파일 확인", ["검사한 키음이 있고, 비어 있지 않은 WAV 파일이다."]],
+      "test_notes_types_lanes_and_times": ["노트", "데이터", "", "모든 노트의 종류·레인·시각 확인", ["종류는 tap/long/slide/drag, 레인은 0 이상, 시각은 0 이상, 롱노트 길이는 0보다 크다."]],
+      "test_note_sound_references_resolve_and_volume_ranges": ["노트", "키음·음량", "", "모든 노트의 키음 이름과 음량 값 확인", ["키음 이름이 소리 목록에 있고 수록 채보의 모든 노트에 키음이 있으며 velocity 1~127, volume 0~200, pan -127~127 이다."]],
+      "test_drag_chains_have_waypoints_in_time_order": ["노트", "드래그", "", "드래그 노트의 경유 지점 확인", ["경유 지점이 2개 이상이고 시각 순서로 이어진다."]],
+      "test_timing_events_valid": ["박자 정보", "데이터", "", "채보의 박자 정보 확인", ["마디는 0 이상, BPM·마디 길이는 양수, 첫 마디 BPM 이 곡 BPM 과 같다."]],
+      "test_gimmick_events_valid_and_lanemix_sections_wellformed": ["레인믹스", "구간", "", "채보의 레인믹스 구간 확인", ["시작·끝이 짝을 이루고 시작이 끝보다 앞이며 목표 키 수가 정해진 값이다."]],
+      "test_lanemix_layer_notes_lie_inside_a_section": ["레인믹스", "노트", "", "레인믹스 레이어 노트의 시각 확인", ["레인믹스 레이어 노트가 모두 구간 안에 있다."]],
+      "test_base_layer_lanes_fit_the_chart_keymode": ["노트", "기본 레이어", "", "기본 레이어 노트의 레인 확인", ["기본 레이어 노트가 있고 모두 16레인 안이다."]],
+      "test_song_folder_structure": ["곡 폴더", "구성", "", "곡 폴더 '{p}' 의 파일 구성 확인", ["곡 정보 파일, 키음 폴더, 풀믹스, 미리듣기, 자켓 그림, 4난이도 채보가 있다."]]
+    }
+  },
+  "test_data_locale.py": {
+    "big": "데이터: 번역", "code": "Locale", "pre": "번역 파일(strings.csv)을 읽기 전용으로 확인",
+    "t": {
+      "test_csv_header_and_row_shape": ["번역 파일", "형식", "", "번역 파일의 머리줄과 줄 모양 확인", ["머리줄이 keys, ko, en 이다.", "모든 줄이 3칸이고 내용이 1줄 이상 있다."]],
+      "test_keys_unique_and_well_named": ["번역 파일", "키", "", "번역 키 확인", ["키가 겹치지 않고 이름 형식이 맞다."]],
+      "test_no_blank_translations_except_known": ["번역 파일", "빈 번역", "", "한국어·영어 번역이 비었는지 확인", ["한국어가 빈 키가 없다.", "영어는 허용된 키만 비어 있다."]],
+      "test_placeholders_match_between_languages": ["번역 파일", "자리표시자", "", "한국어와 영어의 자리표시자 비교", ["두 언어의 자리표시자가 같다."]],
+      "test_keys_used_in_code_exist": ["코드와 대조", "키", "", "코드가 쓰는 번역 키를 번역 파일과 비교", ["코드가 쓰는 키가 모두 번역 파일에 있다."]],
+      "test_dynamic_key_families_have_entries_and_generic_fallback": ["코드와 대조", "이어 붙이는 키", "", "코드에서 뒤를 이어 붙여 쓰는 키 묶음 확인", ["이어 붙이는 키 묶음을 찾는다.", "묶음마다 항목이 1개 이상 있다.", "일반 오류 문구(err_generic)가 있다."]],
+      "test_tf_keys_have_placeholders": ["코드와 대조", "자리표시자", "", "값을 끼워 넣는 키 확인", ["한국어·영어 모두 자리표시자가 있다."]],
+      "test_mark_labels_exist_for_all_marks": ["코드와 대조", "마크 이름", "", "마크 8종의 문구 확인", ["마크마다 문구가 있다."]]
+    }
+  },
+  "test_data_palette.py": {
+    "big": "데이터: 비주얼 테마", "code": "Theme", "pre": "테마 색 파일을 읽기 전용으로 확인",
+    "t": {
+      "test_dot_palette_has_exactly_30_distinct_colors": ["도트 팔레트", "색 수", "", "설계 문서의 도트 팔레트 색 세기", ["서로 다른 색이 30개이다."]],
+      "test_astral_ocean_uses_only_the_30_color_dot_palette": ["아스트랄 오션", "색", "", "아스트랄 오션 테마 파일의 모든 색 확인", ["색이 30개보다 많이 읽힌다.", "30색 밖의 색이 없다."]],
+      "test_every_theme_file_exists_and_is_a_gameplay_palette": ["테마 파일", "형식", "", "테마 3종 파일 확인", ["테마 색 파일 형식이다.", "파일 안의 테마 이름이 파일 이름과 같다."]]
+    }
+  },
+  "test_resume_keys.py": {
+    "big": "시험 도구", "code": "Tool", "pre": "게임·서버 없이 시험 도구만 실행",
+    "t": {
+      "test_same_content_gives_same_fingerprint": ["이어하기 키", "동작", "", "같은 채보 파일로 키를 두 번 만듦", ["두 키가 같다."]],
+      "test_changed_content_changes_fingerprint": ["이어하기 키", "동작", "", "채보 파일 내용을 바꾼 뒤 키를 다시 만듦", ["키가 달라진다."]],
+      "test_unreadable_or_external_paths_are_never_skipped": ["이어하기 키", "예외", "", "읽을 수 없는 채보와 게임 밖 경로의 채보로 키를 만듦", ["읽을 수 없는 채보는 매번 다른 키가 나온다.", "게임 밖 경로의 채보는 매번 다른 키가 나온다."]]
+    }
+  },
+  "test_server_ledger.py": {
+    "big": "시험 도구", "code": "Tool", "pre": "게임·서버 없이 시험 계정 장부와 정리 도구만 실행",
+    "t": {
+      "test_empty_ledger_has_no_accounts": ["계정 장부", "빈 장부", "", "빈 장부 조회", ["계정이 없다."]],
+      "test_register_records_account_once": ["계정 장부", "기록", "", "같은 계정을 두 번 기록", ["한 줄만 적힌다."]],
+      "test_fixed_flag_is_sticky": ["계정 장부", "고정 계정", "", "고정 계정으로 적은 뒤 익명으로 다시 적음", ["계속 고정 계정으로 남는다."]],
+      "test_cleaned_drops_anonymous_but_keeps_fixed": ["계정 장부", "정리 뒤", "", "정리 완료를 기록한 뒤 장부 조회", ["익명 계정은 빠지고 고정 계정은 남는다."]],
+      "test_first_run_start_is_after_last_cleaned": ["계정 장부", "실행 시작 시각", "", "실행 시작·정리·실행 시작을 차례로 기록", ["첫 실행 시작 시각이 적힌다.", "정리 뒤에는 시작 시각이 비워진다.", "다시 실행하면 새 시작 시각이 적힌다."]],
+      "test_non_uuid_is_rejected": ["계정 장부", "잘못된 계정 ID", "", "계정 ID 가 아닌 값('{p}')을 기록", ["기록이 거부된다."]],
+      "test_delete_sql_touches_only_ledger_ids": ["정리 도구", "삭제문", "", "정리 도구가 만드는 삭제문 확인", ["장부에 적힌 계정만 대상이다.", "삭제문이 5개이다.", "익명 계정만 계정째 지운다.", "표 전체를 비우거나 없애는 문장이 없다.", "고정 계정은 기록 행만 지운다."]],
+      "test_fixed_accounts_are_never_deleted_whole": ["정리 도구", "삭제문", "", "계정 삭제문의 대상 확인", ["고정 계정이 계정 삭제 대상에 없다."]],
+      "test_counts_and_suspects_sql_are_read_only": ["정리 도구", "조회문", "", "개수 조회문과 의심 계정 조회문 확인", ["읽기 전용 문장이다."]]
+    }
+  },
+  "_unit": {
+    "test_unit_audio.py": ["키음 음량·좌우(pan) 계산", "Sound", "게임 엔진만 실행(화면 없음)", "음량·pan 계산 함수에 값을 넣어 결과 확인"],
+    "test_unit_audiobus.py": ["소리 설정 적용(음량·음소거·이퀄라이저)", "Sound", "게임 엔진만 실행(화면 없음)", "소리 설정 함수를 호출하고 소리 통로(버스) 상태 확인"],
+    "test_unit_authurl.py": ["로그인 연동 주소·오류 판별", "Login", "게임 엔진만 실행(화면 없음, 서버 접속 없음)", "인증 주소 만들기·오류 판별 함수 호출"],
+    "test_unit_balance.py": ["판정·점수·등급·게이지·콤보·마크", "Judge", "게임 엔진만 실행(화면 없음)", "판정·점수 계산 함수에 값을 넣어 결과 확인"],
+    "test_unit_chartloader.py": ["채보 불러오기", "Chart", "게임 엔진만 실행(화면 없음)", "채보 불러오기 함수 호출"],
+    "test_unit_clock.py": ["곡 시계와 보정", "Clock", "게임 엔진만 실행(화면 없음)", "곡 시계를 시작·일시정지·재개하고 위치 확인"],
+    "test_unit_drag.py": ["드래그 노트 처리", "Note", "게임 엔진만 실행(화면 없음), 곡 시계와 손가락 위치를 직접 움직임", "드래그 노트에 입력을 넣어 판정 확인"],
+    "test_unit_fileutil.py": ["파일 안전 저장", "File", "게임 엔진만 실행(화면 없음)", "파일 저장 함수 호출"],
+    "test_unit_ghost.py": ["고스트 점수 진행 계산", "Ghost", "게임 엔진만 실행(화면 없음)", "고스트 진행 계산 함수에 시각을 넣어 결과 확인"],
+    "test_unit_hold.py": ["롱노트 처리", "Note", "게임 엔진만 실행(화면 없음), 곡 시계와 입력을 직접 움직임", "롱노트에 입력을 넣어 판정 확인"],
+    "test_unit_keysound.py": ["키음 불러오기", "Sound", "게임 엔진만 실행(화면 없음)", "키음 불러오기 함수 호출"],
+    "test_unit_lanemix.py": ["레인믹스 상태·안내·노트 랜덤", "Mix", "게임 엔진만 실행(화면 없음)", "레인믹스 계산 함수에 값을 넣어 결과 확인"],
+    "test_unit_lanes.py": ["레인·키 입력·터치 구역", "Lane", "게임 엔진만 실행(화면 없음)", "레인·입력 계산 함수에 값을 넣어 결과 확인"],
+    "test_unit_locale.py": ["번역 불러오기", "Locale", "게임 엔진만 실행(화면 없음)", "번역 함수 호출"],
+    "test_unit_offline.py": ["서버 접속 차단", "Offline", "서버 접속 차단 인자로 게임 엔진만 실행", "서버 세션과 서버 호출 상태 확인"],
+    "test_unit_package.py": ["곡 패키지 풀기·서명 잠금", "Package", "게임 엔진만 실행(화면 없음), 시험용 패키지 사용", "패키지 풀기 함수 호출"],
+    "test_unit_palette.py": ["비주얼 테마 데이터", "Theme", "게임 엔진만 실행(화면 없음)", "테마 색 파일을 불러와 값 확인"],
+    "test_unit_popups.py": ["공용 팝업", "Popup", "게임 엔진만 실행(화면 없음)", "팝업을 띄우고 버튼·뒤로가기 처리 확인"],
+    "test_unit_records.py": ["로컬 기록 저장", "Record", "게임 엔진만 실행(화면 없음), 빈 기록 저장소", "기록 저장·조회 함수 호출"],
+    "test_unit_scroll.py": ["스크롤·화면 배치·폰트 크기 계산", "Layout", "게임 엔진만 실행(화면 없음)", "스크롤·배치 계산 함수에 값을 넣어 결과 확인"],
+    "test_unit_settings.py": ["게임 설정 저장·적용", "Setting", "게임 엔진만 실행(화면 없음)", "설정 값을 바꾸고 저장·적용 결과 확인"],
+    "test_unit_signing.py": ["공식 채보 서명 검증", "Package", "게임 엔진만 실행(화면 없음)", "수록곡 서명 검증 함수 호출"],
+    "test_unit_slide.py": ["슬라이드 노트", "Note", "게임 엔진만 실행(화면 없음)", "슬라이드 노트를 만들어 값 확인"],
+    "test_unit_timing.py": ["박자·타이밍 계산", "Timing", "게임 엔진만 실행(화면 없음)", "박자·타이밍 계산 함수에 값을 넣어 결과 확인"],
+    "test_unit_upload_queue.py": ["서버 전송 대기열", "Record", "게임 엔진만 실행(화면 없음, 서버 접속 없음)", "기록을 대기열에 쌓고 다시 보내기 처리 확인"],
+    "test_unit_userservice.py": ["유저 프로필·닉네임", "User", "게임 엔진만 실행(화면 없음, 서버 접속 없음)", "닉네임 검사·저장 함수 호출"]
+  },
+  "_pmap": {
+    "test_settings.py::test_sound_row_slider_title_toggle_and_saved_values": {"0-row0": "BGM", "1-row1": "효과음(SFX)", "2-row2": "게임 사운드(키사운드)", "3-row3": "이벤트 효과음"},
+    "test_english_screens.py::test_settings_tabs_have_no_korean": {"settings_account_tab": "계정", "settings_game_tab": "게임", "settings_sound_tab": "사운드", "settings_credits_tab": "크레딧"},
+    "test_tutorial.py::test_next_shows_the_stage_dialogue_in_order": {"0": "1", "1": "2", "2": "3", "3": "4", "4": "5"},
+    "test_tutorial.py::test_note_stage_last_line_shows_start_instead_of_prev_next": {"0": "1", "1": "2", "3": "4"}
+  }
+}
