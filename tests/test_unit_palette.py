@@ -8,9 +8,7 @@ pytestmark = pytest.mark.no_server
 
 _RESULTS = run_unit_module("palette")
 
-# DESIGN §11 의 표는 Great·Good 이 "Wow와 동일 구조, 규모 축소"라고 하고 같은 절 본문은 "Wow/Great/Good이 동일 애니메이션의 크기 차이가 아니라 완전히 다른 연출(motion_type)"이라고 한다.
-# 어느 쪽이 기준인지 사용자 결정 대기(2026-11-10). 지금 데이터는 세 테마 모두 Wow·Great·Good 중 연출 종류가 같은 등급이 있다.
-KNOWN_ISSUES: dict = {"는 서로 다른 연출 종류": "DESIGN §11 표(규모만 축소)와 본문(완전히 다른 연출)이 서로 달라 기준 결정 대기 — 현재 데이터는 Wow·Great·Good 의 motion_type 이 겹침"}
+KNOWN_ISSUES: dict = {}
 
 
 @pytest.mark.parametrize("r", _RESULTS, ids=[r["name"] for r in _RESULTS])

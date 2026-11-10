@@ -1,7 +1,7 @@
 extends RefCounted
 # 슬라이드 노트 (기준: Godot/docs/DESIGN.md §7 노트 종류 — slide: 방향 슬라이드(direction -1/0/+1))
 # 2026-11-10 확인한 구현: SlideNoteVisual 은 모양(화살표)만 방향을 쓰고 판정은 단노트(tap)와 같은 경로다(GameManager._try_judge 의 else 분기:
-# 홀드형이 아니면 judge_ms 후 제거, 만료 루프도 같은 force_miss). 방향 입력을 확인하는 판정은 없다 — DESIGN 의 '방향 슬라이드' 와의 차이는 사용자 결정 대기.
+# 홀드형이 아니면 judge_ms 후 제거, 만료 루프도 같은 force_miss). 방향 입력을 확인하는 판정은 없다 — 방향 판정은 쓸 예정이나 지금 안 쓰므로 구현 보류(사용자 결정, DESIGN §7). 만들 때 이 모듈을 새 기준으로 바꾼다.
 # 이 모듈은 그 구현 사실(홀드형 아님, 방향 값 저장, 장면이 SlideNoteVisual 로 만들어짐)을 고정한다. 판정 경로 자체는 엔진 시험이 필요하다(수록 채보에 슬라이드가 없고 튜토리얼 1단계 한 곳뿐).
 
 var needs_frames := true

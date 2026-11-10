@@ -2,7 +2,7 @@ extends RefCounted
 # 모듈 16 — 비주얼 테마(팔레트 .tres 3개) 데이터 (기준: Godot/docs/DESIGN.md §11 판정 이펙트·비주얼 컨셉 시스템, §13-3 도트 팔레트 30색, §5 마크 8종, 2026-11-10)
 #   - 테마 3개(astral_ocean·cosmic_neon·abyss_ether): PaletteManager 경로·파일이 가리키는 팔레트의 theme_id 가 맞음, 표시 이름이 있고 서로 다름
 #   - 키빔 모드가 테마마다 다름(sine_wobble·hard_flicker·aurora_cycle, DESIGN §11)
-#   - 판정 이펙트 5등급(Wow·Great·Good·Oops·Miss)이 모두 채워져 있고 연출 종류가 허용 목록 안이며, Wow·Great·Good 은 서로 다른 연출이다(DESIGN §11 "동일 애니메이션의 크기 차이가 아니라 완전히 다른 등급 간 위계")
+#   - 판정 이펙트 5등급(Wow·Great·Good·Oops·Miss)이 모두 채워져 있고 연출 종류가 허용 목록 안이며, Wow > Great > Good 으로 규모(연출 길이·입자 수)가 줄어든다(DESIGN §11, Wow·Great·Good 은 같은 종류일 수 있음)
 #   - 노트 색: 키모드별 그룹 순서 흰(W)/파랑(B) — 4키 WBBW, 5키 WBWBW, 6키 WBWWBW, 8키 WBWBBWBW, 16키 WBWBWBWBBWBWBWBW (DESIGN §11, 2026-09-30 사용자 지정)
 #   - 마크 배경/글자색 8종, 등급·게이지 색 조회 함수, 투명도 있는 색의 투명도
 #   (astral_ocean 의 30색 검사는 파일에 직접 적힌 색만 봐야 해서 test_data_palette.py 가 한다 — 안 적힌 필드는 기본값을 물려받는다, DESIGN §11)
@@ -80,7 +80,12 @@ func run() -> Array:
 			check("%s: %s 연출 길이·입자 수·퍼짐 각도가 정상 범위" % [id, g], tier.effect_dur_ms > 0.0 and tier.particle_count >= 0 and tier.spawn_cone_deg > 0.0 and tier.spawn_cone_deg <= 360.0 and tier.particle_life_ms > 0.0,
 				"dur=%s count=%s cone=%s life=%s" % [tier.effect_dur_ms, tier.particle_count, tier.spawn_cone_deg, tier.particle_life_ms])
 			motions.append(tier.motion_type)
-		check("%s: Wow·Great·Good 는 서로 다른 연출 종류(크기만 다른 같은 연출이 아님)" % id, motions.size() == 5 and motions[0] != motions[1] and motions[0] != motions[2] and motions[1] != motions[2], str(motions))
+		# 연출 규모 순서(DESIGN §11, 2026-11-10 사용자 지시로 지금 구현에 맞춤): Great·Good 은 Wow 와 같은 구조의 규모 축소판 — 연출 길이는 Wow > Great > Good 으로 엄격히 줄고 입자 수는 같거나 줄어든다.
+		var w := pal.judge_wow
+		var gr := pal.judge_great
+		var go := pal.judge_good
+		check("%s: 연출 길이가 Wow > Great > Good 으로 줄어듦" % id, w.effect_dur_ms > gr.effect_dur_ms and gr.effect_dur_ms > go.effect_dur_ms, "%s > %s > %s" % [w.effect_dur_ms, gr.effect_dur_ms, go.effect_dur_ms])
+		check("%s: 입자 수가 Wow ≥ Great ≥ Good" % id, w.particle_count >= gr.particle_count and gr.particle_count >= go.particle_count, "%s, %s, %s" % [w.particle_count, gr.particle_count, go.particle_count])
 		eq("%s: 알 수 없는 등급 이름은 Good 연출로 대신함" % id, pal.get_tier("???"), pal.judge_good)
 
 		# ── 노트 색 흰/파랑 순서 ──
