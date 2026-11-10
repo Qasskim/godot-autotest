@@ -34,43 +34,43 @@
 ### 1. MainMenu
 | 케이스 | 방법 | 상태 |
 |--------|------|------|
-| Play 버튼 클릭 → SongSelect | 🔧 신규: `POST /tap/mainmenu_play` (실제 버튼 신호 발생, 기존 `navigate/song_select`는 씬 강제전환이라 버튼 자체 검증 아님) | 🔧 신규 |
-| Settings 버튼 클릭 → Settings 화면 | 🔧 신규: `POST /tap/mainmenu_settings` | 🔧 신규 |
-| 뒤로가기 2회 종료 경고 토스트 | 🔧 신규: `POST /back` (WM_GO_BACK_REQUEST 시뮬레이션) 2회 호출 후 토스트 노출 간접 확인(스크린샷) | 🔧 신규 |
+| Play 버튼 클릭 → SongSelect | `POST /tap/mainmenu_play` (실제 버튼 신호 발생, 기존 `navigate/song_select`는 씬 강제전환이라 버튼 자체 검증 아님) | ✅ 구현 |
+| Settings 버튼 클릭 → Settings 화면 | `POST /tap/mainmenu_settings` | ✅ 구현 |
+| 뒤로가기 2회 종료 경고 토스트 | `POST /back` (WM_GO_BACK_REQUEST 시뮬레이션) 2회 호출 후 토스트 노출 간접 확인(스크린샷) | ✅ 구현 |
 | 뒤로가기 2번 → 정상 종료 (구 "QUIT 버튼", 2026-11-08 교체) | `POST /tap/mainmenu_back` 2회, 프로세스 종료 확인 | ✅ 구현(`test_05_mainmenu_quit_normal_exit`), **시나리오 맨 마지막 1회만** |
 
 ### 2. Settings
 | 케이스 | 방법 | 상태 |
 |--------|------|------|
-| 뒤로가기 버튼 → MainMenu | 🔧 신규: `POST /tap/settings_back` | 🔧 신규 |
-| 캘리브레이션 팝업 열기 | 🔧 신규: `POST /tap/settings_calibrate_open` | 🔧 신규 |
-| TAP 버튼 8회 입력 | 🔧 신규: `POST /tap/settings_calibrate_tap` ×8 | 🔧 신규 |
-| 재시도 버튼 | 🔧 신규: `POST /tap/settings_calibrate_retry` | 🔧 신규 |
-| 적용 버튼 | 🔧 신규: `POST /tap/settings_calibrate_apply` | 🔧 신규 |
-| 닫기 버튼 | 🔧 신규: `POST /tap/settings_calibrate_close` | 🔧 신규 |
+| 뒤로가기 버튼 → MainMenu | `POST /tap/settings_back` | ✅ 구현 |
+| 캘리브레이션 팝업 열기 | `POST /tap/settings_calibrate_open` | ✅ 구현 |
+| TAP 버튼 8회 입력 | `POST /tap/settings_calibrate_tap` ×8 | ✅ 구현 |
+| 재시도 버튼 | `POST /tap/settings_calibrate_retry` | ✅ 구현 |
+| 적용 버튼 | `POST /tap/settings_calibrate_apply` | ✅ 구현 |
+| 닫기 버튼 | `POST /tap/settings_calibrate_close` | ✅ 구현 |
 | 곡 폴더 선택 (FileDialog / Android 오버레이) | — | **N/A — 세부 기획 및 구현 중** |
 
 ### 3. SongSelect
 | 케이스 | 방법 | 상태 |
 |--------|------|------|
-| 전일 기록 탭 전환 | 🔧 신규: `POST /tap/songselect_tab_world` | 🔧 신규 |
-| 내 기록 탭 전환 | 🔧 신규: `POST /tap/songselect_tab_my` | 🔧 신규 |
-| 라이벌 탭 전환 | 🔧 신규: `POST /tap/songselect_tab_rival` | 🔧 신규 (Phase 2 미구현이라 "라이벌 없음" 상태 확인이 전부) |
-| 디버그 팝업 열기/닫기 | 🔧 신규: `POST /tap/songselect_debug_open`, `.../songselect_debug_close` | 🔧 신규 (팝업 내부 오토플레이/등급/터치존 토글은 기존 `/autoplay`, `/autoremix` + 신규 `/touchzone` 엔드포인트로 이미 커버) |
-| 뒤로가기 → MainMenu | 🔧 신규: `POST /tap/songselect_back` | 🔧 신규 |
-| 곡 목록 라이브 조회 | 🔧 신규: `GET /songs` — 진입 시점마다 화면이 실제 렌더링한 목록을 그 자리에서 반환 (캐싱 없음) | 🔧 신규 |
-| N번째 곡 선택 + Play → GameScene | 🔧 신규: `POST /tap/song_at?index=N` (인덱스 기반 실제 탭) + `tap/play` | 🔧 신규 (기존 `tap/first_song`은 0번 고정이라 전체 순회엔 부족) |
+| 전일 기록 탭 전환 | `POST /tap/songselect_tab_world` | ✅ 구현 |
+| 내 기록 탭 전환 | `POST /tap/songselect_tab_my` | ✅ 구현 |
+| 라이벌 탭 전환 | `POST /tap/songselect_tab_rival` | ✅ 구현 (탭 전환은 test_full_scenario, 라이벌 내용은 test_rival_screens·test_server_screens) |
+| 디버그 팝업 열기/닫기 | `POST /tap/songselect_debug_open`, `.../songselect_debug_close` | ✅ 구현 (팝업 내부 오토플레이/등급/터치존 토글은 기존 `/autoplay`, `/autoremix` + 신규 `/touchzone` 엔드포인트로 이미 커버) |
+| 뒤로가기 → MainMenu | `POST /tap/songselect_back` | ✅ 구현 |
+| 곡 목록 라이브 조회 | `GET /songs` — 진입 시점마다 화면이 실제 렌더링한 목록을 그 자리에서 반환 (캐싱 없음) | ✅ 구현 |
+| N번째 곡 선택 + Play → GameScene | `POST /tap/song_at?index=N` (인덱스 기반 실제 탭) + `tap/play` | ✅ 구현 (기존 `tap/first_song`은 0번 고정이라 전체 순회엔 부족) |
 
 ### 4. GameScene (채보마다 반복)
 | 케이스 | 방법 | 상태 |
 |--------|------|------|
 | 카운트다운 → 오토플레이 진행 → 종료 감지 | `wait_game_finished()` | ✅ 기존 |
-| 포즈 오버레이 열기 | 🔧 신규: `POST /tap/pause_open` | 🔧 신규 |
-| 배속 조절 (±, 임의 값) | 🔧 신규: `POST /tap/pause_speed_up`, `.../pause_speed_down` | 🔧 신규 |
-| 캘리브레이션 슬라이더 (임의 값) | 🔧 신규: `POST /pause/calibration?value=N` | 🔧 신규 |
-| 재개 버튼 | 🔧 신규: `POST /tap/pause_resume` | 🔧 신규 |
-| 나가기 버튼 → SongSelect | 🔧 신규: `POST /tap/pause_quit` (채보 1개는 이 경로로, 나머지는 완주로 분기) | 🔧 신규 |
-| 터치존 오버레이 표시 | 🔧 신규: `POST /touchzone/on`, `/touchzone/off` | 🔧 신규 |
+| 포즈 오버레이 열기 | `POST /tap/pause_toggle` (열기) | ✅ 구현 |
+| 배속 조절 (±, 임의 값) | `POST /tap/pause_speed_up`, `.../pause_speed_down` | ✅ 구현 |
+| 캘리브레이션 슬라이더 (임의 값) | `POST /pause/calibration?value=N` | ✅ 구현 |
+| 재개 버튼 | `POST /tap/pause_toggle` (재개) | ✅ 구현 |
+| 나가기 버튼 → SongSelect | `POST /tap/pause_quit` (채보 1개는 이 경로로, 나머지는 완주로 분기) | ✅ 구현 |
+| 터치존 오버레이 표시 | `POST /touchzone/on`, `/touchzone/off` | ✅ 구현 |
 | 마크 리빌 오버레이 | `/result`의 marks 필드로 간접 검증 | ✅ 기존 (화면 직접 확인 아님, 스크린샷과 병행 권장) |
 | 채보 로드 실패 팝업 | 재현 어려우면 Pass | ⚠️ 법칙 2 적용 |
 | 음악 파일 누락 팝업 | 재현 어려우면 Pass | ⚠️ 법칙 2 적용 |
@@ -86,15 +86,15 @@
 ### 6. 반복 종료 후
 | 케이스 | 방법 | 상태 |
 |--------|------|------|
-| `GET /songs` 전체 순회 완료 확인 | 순회 카운터 == 곡 개수 | 🔧 신규 (위 `/songs` 기반) |
+| `GET /songs` 전체 순회 완료 확인 | 순회 카운터 == 곡 개수 | ✅ 구현 (위 `/songs` 기반) |
 | MainMenu 이동 후 뒤로가기 2번 → 정상 종료 (구 "QUIT", 2026-11-08 교체) | `tap/mainmenu_back` 2회, 프로세스 종료 확인 | ✅ 구현, 맨 마지막 1회 |
 
 ### 7. 결과 저장
 | 항목 | 방법 |
 |------|------|
 | xlsx 시트 누적 (일-월-년도) | ✅ 기존 (`result_writer.py`) |
-| FAIL 시 스크린샷 저장 + 경로 텍스트 | 🔧 확장 필요 (현재는 성공 케이스만 일부 스크린샷) |
-| FAIL 시 스크린샷 셀에 이미지 삽입 | 🔧 신규 (`openpyxl.drawing.image.Image`) |
+| FAIL 시 스크린샷 저장 + 경로 텍스트 | ✅ 구현 (FAIL 시 자동 스크린샷, conftest 훅) |
+| FAIL 시 스크린샷 셀에 이미지 삽입 | ✅ 구현 (`openpyxl.drawing.image.Image`) |
 
 ---
 
@@ -115,4 +115,4 @@
 
 ---
 
-> 마지막 업데이트: 2026-07-20 (Godot 실행 후 `pytest test_full_scenario.py -v` 실기 검증 완료 — 17개 케이스 전부 PASS, 4분 46초, 마지막 QUIT 정상 종료까지 확인. `tests/reports/test_results.xlsx` 기록됨)
+> 마지막 업데이트: 2026-11-10 (상태 열을 구현 현황으로 갱신 — 포즈 열기/재개는 `/tap/pause_toggle` 하나. 화면별 세부 시험은 README의 테스트 항목 개요 참고). 이전: 2026-07-20 (Godot 실행 후 `pytest test_full_scenario.py -v` 실기 검증 완료 — 17개 케이스 전부 PASS, 4분 46초, 마지막 QUIT 정상 종료까지 확인. `tests/reports/test_results.xlsx` 기록됨)
