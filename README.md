@@ -1,6 +1,6 @@
 # RhythmGame AutoTest
 
-Godot 4.4 기반 Android 리듬게임의 테스트 자동화 프로젝트입니다.
+Godot 4.7 기반 Android 리듬게임 **ASTRAL RAIN**(2026-11-05 itch.io 프로토타입 공개)의 테스트 자동화 프로젝트입니다.
 
 > 이전 버전은 Appium/UIAutomator2 기반이었으나, Godot의 OpenGL 캔버스 특성상
 > UIAutomator2가 개별 UI 요소를 인식하지 못해(화면 전체가 View 1개로만 잡힘)
@@ -14,17 +14,20 @@ Godot 4.4 기반 Android 리듬게임의 테스트 자동화 프로젝트입니�
 ```
 [Python pytest 테스트 스크립트]
         │
-        │  HTTP (localhost:5000)
-        │  adb forward tcp:5000 tcp:5000
+        │  HTTP (127.0.0.1:5000)
+        │  PC  : 자동화가 Godot 로 게임을 직접 띄운다 (폰 불필요, 지금의 기본 경로)
+        │  폰  : adb forward tcp:5000 tcp:5000
         ▼
-[Godot 앱 내장 TestServer (디버그 빌드 전용, 포트 5000)]
+[Godot 앱 내장 TestServer — 디버그 빌드 전용, 포트 5000, 요청 경로 111종 (GET 30 / POST 81)]
         │
-        ├─ 씬 전환:      GET /scene, POST /navigate/main_menu, /navigate/song_select
-        ├─ 화면별 버튼:  POST /tap/mainmenu_play, /tap/settings_back,
-        │                /tap/songselect_tab_world, /tap/song_at?index=N, ...
-        ├─ 게임플레이:   POST /autoplay/on|off, /tap/pause_toggle,
-        │                /tap/pause_speed_up|down, /pause/calibration, /touchzone/on|off
-        └─ 결과 조회:    GET /result, /best, /game_state, /songs, /screenshot
+        ├─ 화면 읽기:  GET /scene, /screen_texts, /songs, /result, /best, /game_state, /screenshot
+        ├─ 조작:       POST /screen_press?text=, /screen_input, /screen_option, /screen_tab,
+        │              /screen_slider, /screen_press_nth, /debug_click, /debug_drag, /back,
+        │              /navigate/*, /tap/*
+        ├─ 플레이:     POST /autoplay/on|off, /debug_autoplay_live, /debug_goto_gameplay,
+        │              /debug_press_plan, /debug_replay_last, /tap/pause_toggle, /touchzone/on|off
+        ├─ 상태:       GET /debug_notes, /debug_judgment_log, /debug_lanemix_prompt
+        └─ 서버:       POST /supabase_debug_login, /debug_service, GET /supabase_session, /remote_config
 ```
 
 이 방식은 엄밀히는 **블랙박스가 아니라 그레이박스**에 가깝습니다. 실제 유저가 쓸 수 없는
@@ -38,48 +41,45 @@ Godot 4.4 기반 Android 리듬게임의 테스트 자동화 프로젝트입니�
 
 ```
 RhythmGame_AutoTest/
-├── 1_install_and_launch.bat   # APK 설치 + 포트포워딩 + 앱 실행
-├── 2_run_tests.bat            # 기본 테스트 스위트 실행 (앱을 안 끔)
-├── 3_run_full_scenario.bat    # 전체 시나리오 테스트 (마지막에 앱 종료)
-├── apk/
-│   └── RhythmGame_debug.apk
+├── COVERAGE.md                 # 시험 범위 대조표 (게임 스크립트 80개·데이터·서버 함수 ↔ 시험)
+├── 1_install_and_launch.bat    # 폰 실기용 (아래 "폰 실기로 돌릴 때" 참고)
+├── 2_run_tests.bat             # 〃
+├── 3_run_full_scenario.bat     # 〃
+├── csharp_check/               # 시퀀서(C#)의 음량·pan 공식을 그대로 돌려 게임과 비교하는 콘솔
+├── godot_unit/                 # Godot 헤드리스 단위 테스트 본체 unit_*.gd 31개 + 실행기 run_unit.gd
 └── tests/
+    ├── run_all.py              # 풀 테스트 진입점 (unit → integration → server → full)
+    ├── tc_export.py            # 실행 결과 → 사람이 읽는 TC 형식 엑셀
+    ├── tc_catalog/             # TC 문장(대분류·중분류·사전 조건·절차·기대 결과) JSON
     ├── client.py               # TestServer HTTP 클라이언트 래퍼
-    ├── conftest.py              # pytest 공용 fixture + 엑셀 결과 기록 훅
-    ├── result_writer.py         # 결과 엑셀(xlsx) 기록 (PASS/FAIL/N/A + 실패 스크린샷 삽입)
+    ├── godot_runner.py         # 게임·헤드리스 실행 래퍼 (항상 --no-server, APPDATA 격리)
+    ├── conftest.py             # pytest 공용 fixture + 엑셀 결과 기록 훅
+    ├── result_writer.py        # 결과 엑셀(xlsx) 기록 (PASS/FAIL/N/A + 실패 스크린샷 삽입)
+    ├── screen_helpers.py       # 화면에 보이는 글자로 확인하는 공용 도구
+    ├── server_helpers.py       # 서버 테스트 보조
+    ├── server_ledger.py        # 서버에 만든 테스트 계정 장부
+    ├── cleanup_server.py       # 장부에 적힌 테스트 데이터 정리 (기본은 목록만)
+    ├── coverage_audit.py       # COVERAGE.md 점검 도구
+    ├── probe_*.py              # 결함을 좁힐 때 쓴 측정 도구
+    ├── TEST_SCENARIO.md        # 전체 시나리오 테스트의 설계 문서
     ├── requirements.txt
-    ├── TEST_SCENARIO.md         # 전체 시나리오 테스트의 설계 문서
-    ├── test_flow.py             # 씬 전환 플로우
-    ├── test_autoplay.py         # 오토플레이 결과 검증
-    ├── test_marks.py            # 마크 시스템 검증
-    ├── test_best_record.py      # 개인 최고기록 갱신/비교
-    └── test_full_scenario.py    # 모든 화면/버튼 + 곡 전체 순회 + 정상종료
+    └── test_*.py (73개)        # 아래 "테스트 항목 개요" 표 참고
 ```
 
 ---
 
 ## 사전 요구사항
 
-- Python 3.10+
-- Android SDK Platform-Tools (`adb`)
-- USB 디버깅이 켜진 Android 실기기 (연결 상태에서 `adb devices`로 확인)
-
-Python 패키지는 배치 파일 실행 시 자동으로 설치됩니다 (`pip install -r tests/requirements.txt`).
+- Python 3.10+ (`pip install -r tests/requirements.txt`)
+- Godot 4.7 실행 파일 — 자동화가 이걸로 게임을 직접 띄웁니다
+- 대상 게임 프로젝트 — 경로는 환경변수 `GODOT_EXE` / `GAME_PROJECT` 로 지정 (격리용 APPDATA 는 `AUTOTEST_APPDATA`)
+- (폰 실기로 돌릴 때만) Android SDK Platform-Tools(`adb`)와 USB 디버깅이 켜진 실기기
 
 ---
 
 ## 실행 방법
 
-1. **`1_install_and_launch.bat`** 실행 — 기기에 APK 설치, 포트포워딩, 앱 실행까지 한 번에 처리
-2. **`2_run_tests.bat`** 실행 — 기본 테스트 스위트(씬 전환/오토플레이/마크/최고기록) 실행. 반복 실행 가능
-3. **`3_run_full_scenario.bat`** 실행 — 모든 화면/버튼 진입 + 곡 목록 전체 순회 + 정상종료까지 한 번에 검증.
-   **마지막 단계에서 앱을 실제로 종료시키므로**, 다시 테스트하려면 1번부터 재실행
-
-각 배치 파일은 단독으로 실행 가능하며, 실행 중 진행 상황이 CMD 창에 그대로 표시됩니다.
-
-### 풀 테스트 한 번에 (2026-11-08)
-
-PC에서 게임을 자동으로 띄워 전부 돌린다(폰 연결 불필요). 진입점은 `tests/run_all.py` 하나:
+**현재 제공하는 건 PC(엔진)에서 돌리는 방법입니다.** 자동화가 Godot 로 게임을 직접 띄우므로 폰이 없어도 전부 돌아갑니다. 진입점은 `tests/run_all.py` 하나:
 
 ```
 python tests/run_all.py                     # 전부: unit → integration → server → full (몇 시간)
@@ -92,7 +92,13 @@ python tests/run_all.py --cleanup           # server 단계 뒤 장부에 적힌
 - 단계: `unit`(마커 no_server 전부) · `integration`(게임 창 필요, `--no-server`) · `server`(개발 서버에 그대로 접속) · `full`(`test_full_scenario.py`, 마지막에 게임 종료).
 - **앞 단계가 실패해도 끝까지 돈다.** 끝에 단계별 합계 표가 나오고 `tests/reports/full_run_state.json`에 남는다. 결과 파일은 실행마다 새로 생기는 결과 폴더에 모인다(아래 "테스트 결과").
 - 이어하기: `--resume`이면 통과한 단계는 건너뛴다. `full`은 곡마다 끝까지 통과하면 `tests/reports/full_scenario_progress.json`에 적어 두었다가 다음에 그 곡을 건너뛴다(건너뛴 곡은 엑셀에 N/A로 남는다). `--resume` 없이 돌리면 진행 기록을 비우고 처음부터 돈다.
-- 처음 한 번(2026-11-08): unit 단계 735개 중 733 통과·2 알려진 문제(xfail)·실패 0 (5분 32초).
+- 최근 전체 실행(2026-11-10 22:03 ~ 11-11 00:25, 2시간 22분): **1,623건 실패 0** — unit 1,361 · integration 202 · server 43 · full 17. 결과 폴더는 `tests/reports/2026_11_10_1/`(결과물은 저장소에 올리지 않는다).
+
+### 폰 실기로 돌릴 때 (참고)
+
+`1_install_and_launch.bat`(APK 설치 + `adb forward tcp:5000` + 앱 실행) → `2_run_tests.bat`(기본 스위트, 앱을 안 끔) → `3_run_full_scenario.bat`(전체 시나리오, 마지막에 앱 종료) 순서입니다. 같은 테스트가 폰에서도 그대로 돕니다.
+
+다만 **디버그 APK 는 이 저장소에 올리지 않으므로**(아래 "테스트 대상 앱") 받은 그대로는 1번을 돌릴 수 없습니다.
 
 ---
 
@@ -102,7 +108,7 @@ python tests/run_all.py --cleanup           # server 단계 뒤 장부에 적힌
 
 | 파일 | 내용 |
 |----|------|
-| `TC_결과.xlsx` | 사람이 읽는 테스트 케이스 형식. `요약` 시트(대분류별 PASS/FAIL/N/A)와 `TC` 시트(TC 번호·대분류·중분류·소분류·사전 조건·테스트 절차·순번·기대 결과·결과·비고·자동화 시험 이름). 풀 테스트가 끝나면 `tests/tc_export.py`가 자동으로 만든다. 케이스 문장은 `tests/tc_catalog/*.json`에 있고, 새 시험을 만들면 여기에 문장을 같이 써야 한다(없으면 뽑지 않고 빠진 시험 이름을 알려 준다) |
+| `TC_결과.xlsx` | 사람이 읽는 테스트 케이스 형식. `요약` 시트(대분류별 PASS/FAIL/N/A)와 `TC` 시트(TC 번호·대분류·중분류·소분류·사전 조건·테스트 절차·순번·기대 결과·결과·비고·자동화 시험 이름). 풀 테스트가 끝나면 `tests/tc_export.py`가 자동으로 만든다. 케이스 문장은 `tests/tc_catalog/*.json`에 있고, 새 시험을 만들면 여기에 문장을 같이 써야 한다(없으면 뽑지 않고 빠진 시험 이름을 알려 준다). 2026-11-10 실행 기준 **2,542줄**(PASS 2,513 · N/A 29) |
 | `test_results.xlsx` | 시험 이름 그대로의 결과(단계마다 시트) |
 | `FAIL_*.png` | 실패한 시험의 스크린샷(통과한 시험은 찍지 않는다) |
 | `run_log.txt` | 실행 로그 |
@@ -125,6 +131,8 @@ python tests/run_all.py --cleanup           # server 단계 뒤 장부에 적힌
 ---
 
 ## 테스트 항목 개요
+
+시험 파일 **73개**입니다. 단계로 나누면 계산·데이터 1,361 · 게임 화면 202 · 서버 43 · 전체 시나리오 17 (2026-11-10 실행 기준).
 
 | 파일 | 내용 |
 |------|------|
@@ -229,11 +237,24 @@ tests/test_unit_balance.py    # 항목 하나 = pytest 케이스 하나, 기존 
 
 ---
 
+## 자동화가 찾은 결함 (예시)
+
+시험을 만드는 과정에서 나온 것 중 두 건입니다. 둘 다 시험에서 우회하지 않고 게임 쪽을 고친 뒤 같은 시험으로 다시 확인했습니다.
+
+| 증상 | 어떻게 잡았나 | 조치 |
+|---|---|---|
+| 결과 화면에서 리플레이를 열면 **직전 판이 아닌 이전 판**이 재생됨 | `test_replay.py` — 자동 플레이 한 판의 점수·판정 개수·최대 콤보·등급을 리플레이와 대조 | 레인믹스 구간 시작 시각의 기본 노트에 기록이 한 번 더 쓰여 한 칸씩 밀리던 것을 수정 |
+| 계정 복구 뒤 서버 기록을 받으면 **남의 최고 기록이 내 로컬 기록으로 저장**됨 | `test_server_leaderboard_ext.py` — 로컬을 비우고 서버 기록을 내려받은 뒤 저장된 기록의 주인 확인 | 기록 표가 SELECT 공개라 조회 두 곳에 내 아이디(`user_id`) 조건을 추가 |
+
+시험의 목적은 통과율이 아니라 결함을 찾는 것이므로, 실패를 지우거나 통과시키지 않습니다. 시간 초과처럼 외부 요인으로 보이는 실패도 정해진 횟수(서버 로그인은 3회)만 다시 시도하고, 그래도 안 되면 FAIL 로 기록하며 다시 시도해 성공한 횟수를 함께 남깁니다.
+
+---
+
 ## 테스트 대상 앱
 
-대상 게임이 아직 개발 중이므로 디버그 빌드를 제공하고 있습니다. APK는 `apk/` 폴더에 포함되어 있습니다.
-- 현재 음원도 제작중에 있어 키음 노트는 없는 상태입니다. 만약 필요하시다면 BMS를 컨버팅해서 사용하는 방법이 있습니다. 이 부분은 따로 문의주시면 변경한 BMS를 제공하겠습니다.
+대상 게임은 **ASTRAL RAIN** (Godot 4.7 / Android) 이고, 2026-11-05 itch.io 에 프로토타입을 공개했습니다 — <https://vaiaaaaaa.itch.io/astral-rain>
 
-- 패키지명: `com.example.rhythmgame_new`
-- 플랫폼: Android (2400 × 1080)
-- 테스트 서버 포트: 5000 (디버그 빌드에서만 활성화)
+- 수록 17곡 × 4난이도(EZ·NM·HD·EX), 4·5·6·8키, 레인믹스, 서버 리더보드·라이벌·고스트·리플레이
+- 플랫폼: Android (개발 기준 해상도 2400 × 1080)
+- 테스트 서버 포트: 5000 — **디버그 빌드에서만** 켜지고 127.0.0.1 전용. 릴리스 내보내기는 `debug/*` 를 제외합니다
+- **빌드(APK)는 이 저장소에 올리지 않습니다** — 디버그 빌드에는 시험 계정 정보가 들어갈 수 있어 `.gitignore` 에서 `apk/`·`*.apk`·`*.aab` 를 전부 제외합니다
