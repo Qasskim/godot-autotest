@@ -122,4 +122,15 @@ func run() -> Array:
 	find_all(pp2, "Button").filter(func(b): return not (b is CheckBox))[0].pressed.emit()
 	eq("체크하고 확인: 닫히고 동의가 저장됨", [pp2.is_queued_for_deletion(), UserService.has_ack_proto_notice()], [true, true])
 	eq("동의가 저장된 뒤에는 require() 가 다시 띄우지 않음(게스트 빌드 조건과 무관하게 이미 동의)", UserService.has_ack_proto_notice(), true)
+
+	# 처음 설치는 모드 선택 화면을 건너뛰므로 LoginScreen 이 튜토리얼로 가는 동작을 on_done 으로 넘긴다(2026-11-15) — 확인을 누르면 그 뒤 동작이 불려야 한다.
+	var next_calls := [0]
+	var pp3 := ProtoNoticePopup.new()
+	pp3._on_done = func(): next_calls[0] += 1
+	holder.add_child(pp3)
+	pp3._build()
+	_nodes.append(pp3)
+	eq("안내 팝업: 확인 전에는 다음 동작이 불리지 않음", next_calls[0], 0)
+	find_all(pp3, "Button").filter(func(b): return not (b is CheckBox))[0].pressed.emit()
+	eq("안내 팝업: 확인을 누르면 다음 동작(튜토리얼 이동)이 한 번 불림", next_calls[0], 1)
 	return results
