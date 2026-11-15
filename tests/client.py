@@ -63,6 +63,14 @@ def screen_buttons() -> list:
     return [i["text"] for i in screen()["items"] if i["kind"] == "button"]
 
 
+def button_rect(text: str) -> list:
+    """화면에 보이는 버튼의 [x, y, 너비, 높이](화면 좌표). 없으면 빈 리스트. (TestServer /screen_texts 의 rect, 2026-11-15)"""
+    for i in screen()["items"]:
+        if i["kind"] == "button" and i["text"] == text:
+            return i.get("rect", [])
+    return []
+
+
 def press_text(text: str) -> bool:
     """화면에 보이는 버튼을 글자로 찾아 누른다. 그 글자의 보이는 버튼이 없으면 False."""
     return bool(_req("POST", "/screen_press?" + urllib.parse.urlencode({"text": text})).get("ok"))

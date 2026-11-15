@@ -89,6 +89,23 @@ def press(text: str) -> None:
     time.sleep(0.25)
 
 
+def calibration_panel_shown(update: bool = False) -> bool:
+    """튜토리얼 끝·업데이트 뒤 첫 실행의 캘리브레이션 팝업이 보이는지 — 제목, 설명, 나중에 다시 하는 곳 안내(2026-11-11)."""
+    shown = labels()
+    need = [ui("settings_calib_title"), norm(ui("calib_intro_body")), norm(ui("calib_later_notice"))]
+    if update:
+        need.append(norm(ui("calib_update_notice")))
+    return all(t in shown for t in need)
+
+
+def skip_calibration_panel(update: bool = False) -> None:
+    """캘리브레이션 팝업이 뜨기를 기다렸다가 건너뛰기를 누른다."""
+    assert wait_until(lambda: calibration_panel_shown(update), timeout=10), f"캘리브레이션 팝업이 출력되지 않았습니다 — 화면: {labels()}"
+    for name in ("TAP", ui("settings_retry"), ui("settings_apply"), ui("calib_skip")):
+        assert name in client.screen_buttons(), f"캘리브레이션 팝업에 '{name}' 버튼이 없습니다 — 버튼: {client.screen_buttons()}"
+    press(ui("calib_skip"))
+
+
 def dialogue_now() -> str:
     """튜토리얼 화면의 대사 한 줄 — 'Stage' 표시와 판정 글자(AUTO PLAY 등)를 뺀 글자."""
     found = [t for t in labels() if not t.startswith("Stage ")]

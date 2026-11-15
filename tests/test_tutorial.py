@@ -10,7 +10,7 @@ import pytest
 
 import client
 from screen_helpers import (DIALOGUE, HAS_START, enter_tutorial_via_play, enter_tutorial_via_settings, jump_to_stage,
-                            labels, norm, press, stage_label, ui, wait_until)
+                            labels, norm, press, skip_calibration_panel, stage_label, ui, wait_until)
 
 PREV, NEXT = ui("tutorial_prev_btn"), ui("tutorial_next_btn")
 # 각 단계에서 '다음'만 눌러 닿을 수 있는 마지막 대사 번호 — 노트가 있는 단계는 마지막 대사에서 START, 5단계는 1번 대사에서 YES/NO 로 바뀐다
@@ -125,7 +125,9 @@ def finish_with_ok_to_song_select() -> None:
     for name in (NEXT, "YES", "NO"):
         assert name not in buttons()
     press("OK")
-    assert client.wait_for_scene("SongSelect", timeout=10), "OK 를 눌렀는데 곡 선택 화면이 나오지 않았습니다"
+    # 처음 PLAY로 들어온 튜토리얼은 끝나면 캘리브레이션 팝업을 거친다(2026-11-11) — 건너뛰기로 넘어간다
+    skip_calibration_panel()
+    assert client.wait_for_scene("SongSelect", timeout=10), "OK 뒤 캘리브레이션을 건너뛰었는데 곡 선택 화면이 나오지 않았습니다"
 
 
 def play_goes_straight_to_song_select() -> None:
@@ -160,7 +162,8 @@ def test_choice_yes_runs_practice_then_completion_lines_then_ok_opens_song_selec
 def test_skip_opens_song_select_and_play_no_longer_opens_tutorial():
     enter_tutorial_via_play()
     press("SKIP")
-    assert client.wait_for_scene("SongSelect", timeout=10), "스킵을 눌렀는데 곡 선택 화면이 나오지 않았습니다"
+    skip_calibration_panel()
+    assert client.wait_for_scene("SongSelect", timeout=10), "스킵 뒤 캘리브레이션을 건너뛰었는데 곡 선택 화면이 나오지 않았습니다"
     play_goes_straight_to_song_select()
 
 

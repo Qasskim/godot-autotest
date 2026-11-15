@@ -24,7 +24,8 @@ GAME_APPDATA_DIR = os.path.join(REPO_ROOT, "tests", "reports", "_appdata_game")
 SERVER_APPDATA_DIR = os.path.join(REPO_ROOT, "tests", "reports", "_appdata_server")   # 서버 모드 전용 — 로그인 세션이 실행 사이에 남는다
 
 
-def start_game(timeout: int = 90, allow_server: bool = False, fresh_profile: bool = False, extra_args: tuple = ()) -> "subprocess.Popen":
+def start_game(timeout: int = 90, allow_server: bool = False, fresh_profile: bool = False, extra_args: tuple = (),
+               keep_calibration: bool = False) -> "subprocess.Popen":
     """게임을 PC에서 띄운다. **기본은 --no-server**(2026-11-07 사고: 그냥 띄우면 게임이 개발 서버에 익명 계정을 만든다 —
     SupabaseHTTP._ready → ensure_session). 사용자 폴더도 건드리지 않게 APPDATA를 격리 폴더로 바꿔 준다.
     TestServer(포트 5000)가 응답할 때까지 기다렸다가 프로세스를 돌려준다.
@@ -33,7 +34,10 @@ def start_game(timeout: int = 90, allow_server: bool = False, fresh_profile: boo
     --no-server 를 빼고, 서버 전용 APPDATA(세션이 남는 폴더)로 띄운다. 띄우기 전에 장부에 run_start 를 적고,
     뜬 뒤 게임이 가진 서버 세션의 user_id 를 장부에 적는다. 장부에 없는 실계정으로 로그인돼 있으면 중단한다.
 
-    fresh_profile=True 는 '게임을 처음 설치해 처음 켠 상태'(빈 프로필)로 띄운다 — 처음 실행 흐름(로고→타이틀→로그인→닉네임→튜토리얼)을 확인하는 테스트 전용."""
+    fresh_profile=True 는 '게임을 처음 설치해 처음 켠 상태'(빈 프로필)로 띄운다 — 처음 실행 흐름(로고→타이틀→로그인→닉네임→튜토리얼)을 확인하는 테스트 전용.
+
+    keep_calibration=True 는 보정 파일(calibration.cfg)을 건드리지 않는다 — 1.0.0 형식 보정 파일의 업데이트 처리를 보는 시험 전용
+    (test_calibration_migration.py). 기본은 보정 0의 현재 형식 파일을 적어 둔다(_seed_calibration)."""
     import time
     import urllib.request
     import server_ledger
@@ -50,6 +54,8 @@ def start_game(timeout: int = 90, allow_server: bool = False, fresh_profile: boo
     if _ping():
         raise RuntimeError("포트 5000에 이미 다른 게임이 떠 있습니다 — 그 게임을 시험 대상으로 착각하지 않도록 중단합니다.")
     _seed_profile(appdata, fresh_profile)
+    if not keep_calibration:
+        _seed_calibration(appdata, fresh_profile)
     env = dict(os.environ, APPDATA=appdata)
     cmd = [GODOT_EXE, "--path", GAME_PROJECT, "--windowed", "--resolution", "1920x864", "--position", "0,0"]
     if not allow_server:
@@ -106,6 +112,35 @@ def _seed_profile(appdata: str, fresh: bool = False) -> None:
     profile["display_name"] = profile.get("display_name") or "AutoTest"
     with open(path, "w", encoding="utf-8") as f:
         json.dump(profile, f, ensure_ascii=False)
+
+
+def calibration_path(appdata: str = GAME_APPDATA_DIR) -> str:
+    return os.path.join(appdata, "RhythmGame_New", "calibration.cfg")
+
+
+def _seed_calibration(appdata: str, fresh: bool = False) -> None:
+    """보정 파일을 보정 0의 현재 형식(calibration_rule=2)으로 적어 둔다. 게임은 이 키가 없는 파일(1.0.0 형식)에 값이 있으면
+    0으로 되돌리고 모드 선택 화면에 캘리브레이션 팝업을 한 번 띄운다(TimingManager._load_calibration, 2026-11-11). 시험 폴더에
+    예전 시험이 남긴 옛 형식 파일이 있으면 그 팝업이 다른 시험의 화면을 가리므로 띄울 때마다 맞춘다.
+    빈 프로필(처음 설치)이면 파일을 지운다 — 처음 설치한 폰에는 보정 파일이 없다."""
+    path = calibration_path(appdata)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    if fresh:
+        if os.path.exists(path):
+            os.remove(path)
+        return
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("[audio]\n\nuser_calibration_ms=0.0\ncalibration_rule=2\nrecalibration_prompt=false\n")
+
+
+def read_calibration(appdata: str = GAME_APPDATA_DIR) -> dict:
+    """보정 파일의 [audio] 값들을 읽는다(없으면 빈 dict). 값은 글자 그대로."""
+    try:
+        with open(calibration_path(appdata), encoding="utf-8") as f:
+            lines = f.read().splitlines()
+    except OSError:
+        return {}
+    return {k.strip(): v.strip() for k, _, v in (l.partition("=") for l in lines if "=" in l)}
 
 
 def _register_launch_session() -> None:

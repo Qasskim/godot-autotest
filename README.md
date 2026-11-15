@@ -63,7 +63,7 @@ RhythmGame_AutoTest/
     ├── probe_*.py              # 결함을 좁힐 때 쓴 측정 도구
     ├── TEST_SCENARIO.md        # 전체 시나리오 테스트의 설계 문서
     ├── requirements.txt
-    └── test_*.py (73개)        # 아래 "테스트 항목 개요" 표 참고
+    └── test_*.py (75개)        # 아래 "테스트 항목 개요" 표 참고
 ```
 
 ---
@@ -132,7 +132,7 @@ python tests/run_all.py --cleanup           # server 단계 뒤 장부에 적힌
 
 ## 테스트 항목 개요
 
-시험 파일 **73개**입니다. 단계로 나누면 계산·데이터 1,361 · 게임 화면 202 · 서버 43 · 전체 시나리오 17 (2026-11-10 실행 기준).
+시험 파일 **75개**입니다(2026-11-13). 단계별 건수는 2026-11-10 전체 실행 기준(73개 파일 시절): 계산·데이터 1,361 · 게임 화면 202 · 서버 43 · 전체 시나리오 17.
 
 | 파일 | 내용 |
 |------|------|
@@ -204,6 +204,8 @@ python tests/run_all.py --cleanup           # server 단계 뒤 장부에 적힌
 | `test_orientation_flip.py` | 화면 뒤집힘 감지 → 자동 일시정지 4개 — 처음 값은 기준만, 애매한 값 무시, 부호 반전 시 정지, 정지 중 재반전은 쌓이지 않음 (`/debug_gravity`로 센서 값 주입) |
 | `test_low_spec_play.py` | 저사양 모드 재생 경로 — 켜고 풀믹스가 있는 곡을 치면 풀믹스 경로가 켜지고 끄면 꺼짐 |
 | `test_song_list_drag.py` | 곡 목록 끌어서 스크롤 5개 (2026-11-10) — 위로 끌면 목록이 내려가고 곡 선택은 안 바뀜, 아래로 끌면 올라가 맨 위에서 멈춤, 계속 끌면 목록 끝에서 멈춤, 목록 밖에서 시작한 끌기 무시, 임계값 아래 움직임은 탭 (`/debug_drag`·`/debug_scroll`) |
+| `test_calibration_screen.py` | 튜토리얼 끝 캘리브레이션 팝업 5개 (2026-11-11, 버튼이 화면 안에 있는지 2026-11-15 추가) — 처음 PLAY로 들어간 튜토리얼을 마치면(완료·스킵) 팝업(제목·설명·"SETTINGS > 게임 > 캘리브레이션 측정에서 언제든 다시 할 수 있다" 안내·TAP/다시/적용/건너뛰기)이 뜨고 건너뛰기·적용·뒤로가기 모두 곡 선택으로, 적용하면 현재 형식(`calibration_rule=2`)으로 저장, 설정에서 다시 본 튜토리얼 뒤에는 안 뜸 |
+| `test_calibration_migration.py` | 1.0.0 형식 보정 파일 처리 3개 (2026-11-11, 게임을 직접 띄움, 업데이트 팝업 버튼이 화면 안에 있는지 2026-11-15 추가) — 값이 있으면 시작 때 0으로 되돌리고 모드 선택 화면에 업데이트 안내 팝업을 한 번 띄움(건너뛰면 다시 안 뜸), 값이 0이면 안 띄움 |
 | `test_na_user_areas.py` | **N/A 항목 25개 (비고 "유저 테스트 필요")** — 계정·외부 로그인 5(탈퇴 실행·Play Games·PC 구글 로그인·구글 연동 복구·라이벌 탈퇴 알림), 모양 9, 사용성 6, 폰 전용 5. 각 비고에 자동화로 확인되는 앞부분의 시험 이름도 적음. 결과 엑셀에 N/A 로 남음 |
 | `test_server_leaderboard_ext.py` | 서버 9개 (`server`, 2026-11-10) — 전일 1위 조회(순위·닉네임·점수·등급, 기록 없는 곡은 빈 값), 실패 기록 판별, 라이벌 기록 조회, 라이벌 알림 조회·삭제 호출, 계정 복구(로컬을 비우고 서버 기록 내려받기), 서버 시퀀스 리플레이(전일 1위·라이벌의 판정을 그대로 재생, 기록 저장 안 함) |
 | `COVERAGE.md` | **시험 범위 대조표** — 게임 스크립트 80개·데이터·서버 함수를 시험과 하나씩 대조(시험/화면/모양/폰·외부/안 씀/빈 곳). 점검 도구 `tests/coverage_audit.py` |
@@ -229,7 +231,7 @@ tests/test_unit_balance.py    # 항목 하나 = pytest 케이스 하나, 기존 
 - **헤드리스 실행기도 항상 `--no-server`를 붙인다** (2026-11-08 사고: 모듈이 스크립트 오류로 멈춰 감시 타이머 전까지 프레임이 돌았고, 그동안 오토로드 `_ready`가 개발 서버에 익명 계정을 만들었다). 모듈 5가 이 가드를 확인한다.
 - **게임 창이 필요한 통합 테스트는 게임을 자동으로 띄운다** (2026-11-08): 세션 시작 때 포트 5000에 10초 동안 응답이 없으면 `conftest.py`가 `start_game()`(항상 `--no-server`)으로 PC에서 게임을 직접 띄우고 세션이 끝나면 종료한다. 폰 등 이미 떠 있는 게임이 있으면 그것을 쓴다. 끄려면 환경변수 `AUTOTEST_AUTOLAUNCH=0`(그러면 게임이 없을 때 skip). 확인: 기존 통합 18개(`test_flow`·`test_autoplay`·`test_marks`·`test_best_record`) 전부 통과(13분 19초), `supabase_session.json` 미생성.
 - **서버 접속 테스트만 예외 (2026-11-08, 사용자 확정)**: 기록 저장·서버 점수 재계산·리더보드·라이벌·닉네임은 서버가 있어야 검증된다. 이런 테스트에는 `@pytest.mark.server`를 단다(개발 서버에 그대로 접속한다). 서버 테스트는 맨 뒤로 정렬되고, 그때 게임을 `--no-server` 없이 서버 전용 APPDATA(`tests/reports/_appdata_server`, 로그인 세션이 실행 사이에 남음)로 다시 띄운다(`start_game(allow_server=True)`). 서버에 만든 계정은 만드는 즉시 장부 `server_ledger.jsonl`(저장소 루트, 추적 안 함)에 적는다(`tests/server_ledger.py`). 정리는 `python tests/cleanup_server.py` — **장부에 적힌 계정만** 대상이고, 기본은 지울 목록·행 수만 보여준다(읽기 전용). 익명 계정은 계정째, 고정 테스트 계정(`debug_test_account{N}`)은 계정·닉네임을 남기고 기록 행만 지운다. 장부 밖 의심 계정은 보여주기만 한다. 실제 삭제는 `--apply`이고 사용자 확인 뒤에만 실행한다(Supabase CLI가 이 프로젝트를 production으로 표시하고 쓰기에는 `--yes`를 요구한다). 규칙 검사: `tests/test_server_ledger.py`.
-- **화면에 보이는 글자로 확인하는 테스트 — 튜토리얼·처음 실행 (2026-11-08)**: 게임 TestServer의 `GET /screen_texts`(지금 화면에 보이는 Label·Button·입력창 글자, 아이콘 버튼은 안쪽 라벨), `POST /screen_press?text=`(글자로 버튼 누르기), `POST /screen_input?text=`(입력창 채우기), `POST /debug_profile?key=&value=`(프로필 값 바꾸기, 예: `tutorial_seen=false`)를 쓴다(`client.screen()`·`press_text()`·`fill_input()`, 공용 도구는 `tests/screen_helpers.py`). `test_tutorial.py`(23개)는 첫 화면·이전/다음·단계별 대사·START·자동 시연·예/아니오·완료·스킵·BGM 이어짐·설정 다시보기를, `test_onboarding.py`(7개)는 빈 프로필로 처음 켠 뒤 로그인 화면→게스트 경고→닉네임 팝업→닉네임 검사→메인 메뉴→첫 PLAY가 튜토리얼인 것까지를 확인한다. 후자는 마커 `fresh_profile`이라 게임을 빈 프로필로 새로 띄운다. 시험용 프로필은 언어를 한국어로 고정하고, 닉네임·튜토리얼·온보딩 완료 표시를 미리 적어 둔다(처음 실행 테스트만 빈 프로필). 튜토리얼 대사는 `docs/TUTORIAL_SPEC.md` §4 표를 `screen_helpers.DIALOGUE`에 따로 옮겨 놓고 화면과 비교하며, 줄바꿈 위치는 비교하지 않는다. 소리·모양은 사람이 확인한다.
+- **화면에 보이는 글자로 확인하는 테스트 — 튜토리얼·처음 실행 (2026-11-08)**: 게임 TestServer의 `GET /screen_texts`(지금 화면에 보이는 Label·Button·입력창 글자, 아이콘 버튼은 안쪽 라벨), `POST /screen_press?text=`(글자로 버튼 누르기), `POST /screen_input?text=`(입력창 채우기), `POST /debug_profile?key=&value=`(프로필 값 바꾸기, 예: `tutorial_seen=false`)를 쓴다(`client.screen()`·`press_text()`·`fill_input()`, 공용 도구는 `tests/screen_helpers.py`). `test_tutorial.py`(23개)는 첫 화면·이전/다음·단계별 대사·START·자동 시연·예/아니오·완료·스킵·BGM 이어짐·설정 다시보기를, `test_onboarding.py`(6개)는 빈 프로필로 처음 켠 뒤 로그인 화면→게스트 경고→닉네임 팝업→닉네임 검사→닉네임 저장 직후 모드 선택 화면 없이 바로 튜토리얼 1단계(2026-11-15 사용자 결정)까지를 확인한다. 후자는 마커 `fresh_profile`이라 게임을 빈 프로필로 새로 띄운다. 시험용 프로필은 언어를 한국어로 고정하고, 닉네임·튜토리얼·온보딩 완료 표시를 미리 적어 둔다(처음 실행 테스트만 빈 프로필). 튜토리얼 대사는 `docs/TUTORIAL_SPEC.md` §4 표를 `screen_helpers.DIALOGUE`에 따로 옮겨 놓고 화면과 비교하며, 줄바꿈 위치는 비교하지 않는다. 소리·모양은 사람이 확인한다.
 - **전 화면 글자 확인에 쓰는 TestServer 훅 (2026-11-08)**: 위 3종에 더해 `GET /screen_texts` 항목에 탭 제목(`tab`)·슬라이더 값/투명도(`slider`)·그림 경로(`image`)·버튼 안쪽 글자(`inner`)가 들어간다. 조작은 `POST /screen_option?n=&item=`(n번째 드롭다운 항목 고르기), `/screen_tab?text=`(탭 옮기기), `/screen_slider?n=&value=`(슬라이더 값), `/screen_press_nth?n=`(글자 없는 아이콘 버튼), `/back`(안드로이드 뒤로가기 키), `/navigate/company_logo`, `/debug_click?...&no_release=1`/`&release_only=1`(스와이프). 체크·토글 버튼은 누르면 상태까지 뒤집힌다. 모두 디버그 빌드의 127.0.0.1 전용이며 릴리스 내보내기는 `debug/*`를 제외한다.
 - 게임 사용자 폴더(`%APPDATA%\RhythmGame_New`)와 서버 세션을 건드리지 않도록 게임 프로세스에만 `APPDATA`를 `tests/reports/_appdata`로 바꿔 줍니다.
 
