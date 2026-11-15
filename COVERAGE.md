@@ -1,12 +1,12 @@
 # 시험 범위 대조표 — 아스트랄 레인(게임 기능·데이터)
 
-> 2026-11-10 작성. 게임 스크립트 80개·씬·데이터·서버 함수를 하나씩 대조했다. 점검 도구: `tests/coverage_audit.py`(스크립트 이름·공개 함수 이름이 시험에 나오는지 셈). 이 도구는 **이름이 나오는지**만 보며 줄 단위 실행 범위는 아니다(Godot에는 GDScript 줄 단위 측정 도구가 없음).
+> 2026-11-10 작성(2026-11-15 갱신: 스크립트 81개 — `ui/CalibrationPanel` 추가). 게임 스크립트 81개·씬·데이터·서버 함수를 하나씩 대조했다. 점검 도구: `tests/coverage_audit.py`(스크립트 이름·공개 함수 이름이 시험에 나오는지 셈). 이 도구는 **이름이 나오는지**만 보며 줄 단위 실행 범위는 아니다(Godot에는 GDScript 줄 단위 측정 도구가 없음).
 >
 > **풀 테스트의 범위(사용자 정의, 2026-11-10)**: 게임의 기능 및 데이터 중 Claude가 자동화할 수 있는 만큼. 모양·사용성·폰 전용 동작은 시험 목록(TC)에 N/A 항목으로 남기고 비고에 "유저 테스트 필요"를 적는다(`tests/test_na_user_areas.py`).
 >
 > 분류(표의 "모양"·"폰·외부"는 모두 TC 에 N/A, 비고 "유저 테스트 필요"로 있음): **시험** = 그 코드를 직접 확인하는 시험이 있음 / **화면** = 화면·엔진 시험이 그 동작을 거쳐 확인 / **모양** = 눈으로 보는 것(범위 밖) / **폰·외부** = 폰 센서·Play Games·외부 로그인(범위 밖) / **안 씀** = 쓰는 곳이 없는 코드 / **빈 곳** = 시험이 없어 만들어야 함
 
-## 1. 스크립트 80개
+## 1. 스크립트 81개
 
 | 스크립트 | 분류 | 확인하는 시험 / 비고 |
 |---|---|---|
@@ -37,7 +37,7 @@
 | core/ScreenLayout | 시험 | test_unit_scroll(11개 해상도 레이아웃·폰트 규칙) |
 | core/SupabaseHTTP | 시험 | test_unit_offline(`--no-server` 차단), test_unit_authurl. 토큰 갱신·PKCE 교환은 외부 로그인이 필요해 N/A(유저 테스트 영역) |
 | core/TimeSignature | 시험 | test_unit_timing |
-| core/TimingManager | 시험 | test_unit_timing, test_unit_clock |
+| core/TimingManager | 시험 | test_unit_timing, test_unit_clock, test_calibration_migration(1.0.0 보정 파일 → 0 초기화·업데이트 안내 표시) |
 | core/ToastManager | 화면 | 종료 경고 토스트(test_mainmenu, test_boot) |
 | core/UserService | 시험 | test_unit_userservice, test_onboarding, test_server_settings, test_server_score(닉네임) |
 | effects/HoldEffect·JudgmentEffect·LaneMixTransition | 모양 | 판정 연출의 길이·입자 수 순서는 test_unit_palette |
@@ -64,6 +64,7 @@
 | ui/Settings | 화면 | test_settings, test_server_settings |
 | ui/SongSelect | 화면 | test_songselect, test_server_screens |
 | ui/Tutorial·TutorialBackdrop·TutorialGameplay | 화면 | test_tutorial, test_tutorial_layout, test_onboarding |
+| ui/CalibrationPanel | 화면 | test_calibration_screen(튜토리얼 끝 팝업·건너뛰기·적용·뒤로가기·버튼이 화면 안), test_calibration_migration(업데이트 뒤 팝업), test_full_scenario(설정에서 열기·닫기) |
 
 ## 2. 데이터
 
